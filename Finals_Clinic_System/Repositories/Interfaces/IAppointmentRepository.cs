@@ -1,11 +1,24 @@
-﻿using Finals_Clinic_System.Models;
-namespace Finals_Clinic_System.Repositories.Interfaces;
-public interface IAppointmentRepository
+﻿using Finals_Clinic_System.DTOs.Appointments;
+using Finals_Clinic_System.Models;
+
+namespace Finals_Clinic_System.Services.Interfaces;
+
+public interface IAppointmentService
 {
-    Task&lt;List&lt;Appointment&gt;&gt; GetAllAsync();
-    Task&lt;Appointment?&gt; GetByIdAsync(int id);
-    Task&lt;bool&gt; HasConflictAsync(int doctorId, DateOnly date, TimeOnly time, int? excludeAppointmentId = null);
-    Task AddAsync(Appointment appointment);
-    Task&lt;List&lt;Appointment&gt;&gt; GetDailyScheduleAsync(DateOnly date);
-    Task SaveChangesAsync();
+    Task<List<Appointment>> GetAllAsync();
+
+    Task<Appointment?> GetByIdAsync(int id);
+
+    Task<(bool Success, string Message, Appointment? Data)> CreateAsync(
+        AppointmentCreateDto dto);
+
+    Task<(bool Success, string Message, Appointment? Data)> UpdateAsync(
+        int id,
+        AppointmentUpdateDto dto);
+
+    Task<(bool Success, string Message)> ChangeStatusAsync(
+        int id,
+        string newStatus);
+
+    Task<List<Appointment>> GetDailyScheduleAsync(DateOnly date);
 }
