@@ -3,6 +3,9 @@
 public class Patient
 {
     public int PatientId { get; set; }
+    public int? UserId { get; set; }
+    public User? User { get; set; }
+
     public string FullName { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
 
