@@ -1,7 +1,14 @@
-﻿namespace Finals_Clinic_System.DTOs.Auth;
+﻿
+using System.ComponentModel.DataAnnotations;
+
+namespace Finals_Clinic_System.DTOs.Auth;
 
 public class LoginDto
 {
+    [Required]
+    [EmailAddress]
     public string Email { get; set; } = string.Empty;
+
+    [Required]
     public string Password { get; set; } = string.Empty;
 }
