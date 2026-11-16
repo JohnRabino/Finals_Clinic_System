@@ -1,4 +1,5 @@
-﻿namespace Finals_Clinic_System.DTOs.Auth;
+﻿
+namespace Finals_Clinic_System.DTOs.Auth;
 
 public class AuthResponseDto
 {
