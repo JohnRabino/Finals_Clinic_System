@@ -23,27 +23,46 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
+
     public async Task<(bool Success, string Message, AuthResponseDto? Data)> RegisterAsync(RegisterDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.FullName) ||
-            string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
+            string.IsNullOrWhiteSpace(dto.Email) ||
+            string.IsNullOrWhiteSpace(dto.Password))
+        {
             return (false, "Name, email, and password are required.", null);
+        }
 
         var email = dto.Email.Trim().ToLowerInvariant();
+
         if (await _db.Users.AnyAsync(u => u.Email == email))
+        {
             return (false, "Email is already registered.", null);
+        }
 
         var user = new User
         {
             FullName = dto.FullName.Trim(),
             Email = email,
-            Role = "Patient",
+            Role = "Student",
             IsActive = true
         };
+
         user.PasswordHash = _hasher.HashPassword(user, dto.Password);
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
+
+        var patient = new Patient
+        {
+            UserId = user.UserId,
+            FullName = user.FullName,
+            IsActive = true
+        };
+
+        _db.Patients.Add(patient);
+        await _db.SaveChangesAsync();
+
         return (true, "Registration successful.", BuildResponse(user));
     }
 
