@@ -58,5 +58,11 @@ public class ClinicDbContext : DbContext
         modelBuilder.Entity<User>()
             .Property(u => u.Role)
             .HasMaxLength(30);
+
+        modelBuilder.Entity<Patient>()
+            .HasOne(p => p.User)
+            .WithOne()
+            .HasForeignKey<Patient>(p => p.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
