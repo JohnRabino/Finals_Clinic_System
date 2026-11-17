@@ -151,5 +151,9 @@ public class ClinicDbContext : DbContext
             .WithMany()
             .HasForeignKey(m => m.EncodedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Consultation>()
+            .Property(c => c.Temperature)
+            .HasPrecision(5, 2);
     }
 }
