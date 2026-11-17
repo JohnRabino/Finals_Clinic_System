@@ -13,4 +13,7 @@ public class Referral
     public string Status { get; set; } = "Pending";
 
     public DateTime ReferralDate { get; set; } = DateTime.Now;
+
+    public Patient Patient { get; set; } = null!;
+    public ExternalDoctor ExternalDoctor { get; set; } = null!;
 }
