@@ -10,10 +10,12 @@ public class MedicalRecord
     public int PatientId { get; set; }
     public Patient Patient { get; set; } = null!;
 
+    public Consultation Consultation { get; set; } = null!;
+
     public int ConsultationId { get; set; }
 
-    public int DoctorId { get; set; }
-    public Doctor Doctor { get; set; } = null!;
+    public int? DoctorId { get; set; }
+    public Doctor? Doctor { get; set; }
 
     public int? AppointmentId { get; set; }
     public Appointment? Appointment { get; set; }
