@@ -1,5 +1,3 @@
-﻿using System.Numerics;
-
 namespace Finals_Clinic_System.Models;
 
 public class Appointment
@@ -15,6 +13,8 @@ public class Appointment
     public int TimeSlotId { get; set; }
     public ClinicTimeSlot TimeSlot { get; set; } = null!;
 
+    public DateOnly AppointmentDate { get; set; }
+    public TimeOnly AppointmentTime { get; set; }
     public string Status { get; set; } = "Booked";
     public string? Reason { get; set; }
 
