@@ -30,11 +30,8 @@ namespace Finals_Clinic_System.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AppointmentId"));
 
-                    b.Property<DateOnly>("AppointmentDate")
-                        .HasColumnType("date");
-
-                    b.Property<TimeOnly>("AppointmentTime")
-                        .HasColumnType("time");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("DoctorId")
                         .HasColumnType("int");
@@ -50,13 +47,103 @@ namespace Finals_Clinic_System.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int>("TimeSlotId")
+                        .HasColumnType("int");
+
                     b.HasKey("AppointmentId");
 
                     b.HasIndex("DoctorId");
 
                     b.HasIndex("PatientId");
 
+                    b.HasIndex("TimeSlotId");
+
                     b.ToTable("Appointments");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.ClinicTimeSlot", b =>
+                {
+                    b.Property<int>("TimeSlotId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TimeSlotId"));
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly>("SlotDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("TimeSlotId");
+
+                    b.ToTable("ClinicTimeSlots");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.Consultation", b =>
+                {
+                    b.Property<int>("ConsultationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConsultationId"));
+
+                    b.Property<int?>("AppointmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Assessment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AssistanceProvided")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BloodPressure")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Complaint")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ConsultationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FollowUpInstructions")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NurseUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Temperature")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<TimeOnly>("TimeIn")
+                        .HasColumnType("time");
+
+                    b.Property<TimeOnly?>("TimeOut")
+                        .HasColumnType("time");
+
+                    b.HasKey("ConsultationId");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("NurseUserId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Consultations");
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.Doctor", b =>
@@ -114,6 +201,46 @@ namespace Finals_Clinic_System.Migrations
                     b.ToTable("ExternalDoctors");
                 });
 
+            modelBuilder.Entity("Finals_Clinic_System.Models.ManualClinicLog", b =>
+                {
+                    b.Property<int>("ManualLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ManualLogId"));
+
+                    b.Property<string>("Complaint")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EncodedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EncodedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PatientName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("VisitDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ManualLogId");
+
+                    b.HasIndex("EncodedByUserId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("ManualClinicLogs");
+                });
+
             modelBuilder.Entity("Finals_Clinic_System.Models.MedicalRecord", b =>
                 {
                     b.Property<int>("RecordId")
@@ -125,11 +252,14 @@ namespace Finals_Clinic_System.Migrations
                     b.Property<int?>("AppointmentId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ConsultationId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Diagnosis")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DoctorId")
+                    b.Property<int?>("DoctorId")
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
@@ -148,6 +278,8 @@ namespace Finals_Clinic_System.Migrations
                     b.HasKey("RecordId");
 
                     b.HasIndex("AppointmentId");
+
+                    b.HasIndex("ConsultationId");
 
                     b.HasIndex("DoctorId");
 
@@ -181,6 +313,86 @@ namespace Finals_Clinic_System.Migrations
                         .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Patients");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.Prescription", b =>
+                {
+                    b.Property<int>("PrescriptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PrescriptionId"));
+
+                    b.Property<int>("ConsultationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Dosage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Instructions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MedicineName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PrescribingDoctorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PrescriptionDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PrescriptionId");
+
+                    b.HasIndex("ConsultationId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Prescriptions");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.Referral", b =>
+                {
+                    b.Property<int>("ReferralId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReferralId"));
+
+                    b.Property<int>("ExternalDoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReferralDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("ReferralId");
+
+                    b.HasIndex("ExternalDoctorId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Referrals");
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.User", b =>
@@ -240,7 +452,59 @@ namespace Finals_Clinic_System.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Finals_Clinic_System.Models.ClinicTimeSlot", "TimeSlot")
+                        .WithMany("Appointments")
+                        .HasForeignKey("TimeSlotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("TimeSlot");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.Consultation", b =>
+                {
+                    b.HasOne("Finals_Clinic_System.Models.Appointment", "Appointment")
+                        .WithMany()
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Finals_Clinic_System.Models.User", "Nurse")
+                        .WithMany()
+                        .HasForeignKey("NurseUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Finals_Clinic_System.Models.Patient", "Patient")
+                        .WithMany("Consultations")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("Nurse");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.ManualClinicLog", b =>
+                {
+                    b.HasOne("Finals_Clinic_System.Models.User", "EncodedByUser")
+                        .WithMany()
+                        .HasForeignKey("EncodedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Finals_Clinic_System.Models.Patient", "Patient")
+                        .WithMany("ManualClinicLogs")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("EncodedByUser");
 
                     b.Navigation("Patient");
                 });
@@ -252,11 +516,15 @@ namespace Finals_Clinic_System.Migrations
                         .HasForeignKey("AppointmentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("Finals_Clinic_System.Models.Consultation", "Consultation")
+                        .WithMany("MedicalRecords")
+                        .HasForeignKey("ConsultationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Finals_Clinic_System.Models.Doctor", "Doctor")
                         .WithMany("MedicalRecords")
                         .HasForeignKey("DoctorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Finals_Clinic_System.Models.Patient", "Patient")
                         .WithMany("MedicalRecords")
@@ -265,6 +533,8 @@ namespace Finals_Clinic_System.Migrations
                         .IsRequired();
 
                     b.Navigation("Appointment");
+
+                    b.Navigation("Consultation");
 
                     b.Navigation("Doctor");
 
@@ -281,6 +551,56 @@ namespace Finals_Clinic_System.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Finals_Clinic_System.Models.Prescription", b =>
+                {
+                    b.HasOne("Finals_Clinic_System.Models.Consultation", "Consultation")
+                        .WithMany("Prescriptions")
+                        .HasForeignKey("ConsultationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Finals_Clinic_System.Models.Patient", "Patient")
+                        .WithMany("Prescriptions")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Consultation");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.Referral", b =>
+                {
+                    b.HasOne("Finals_Clinic_System.Models.ExternalDoctor", "ExternalDoctor")
+                        .WithMany("Referrals")
+                        .HasForeignKey("ExternalDoctorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Finals_Clinic_System.Models.Patient", "Patient")
+                        .WithMany("Referrals")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ExternalDoctor");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.ClinicTimeSlot", b =>
+                {
+                    b.Navigation("Appointments");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.Consultation", b =>
+                {
+                    b.Navigation("MedicalRecords");
+
+                    b.Navigation("Prescriptions");
+                });
+
             modelBuilder.Entity("Finals_Clinic_System.Models.Doctor", b =>
                 {
                     b.Navigation("Appointments");
@@ -288,11 +608,24 @@ namespace Finals_Clinic_System.Migrations
                     b.Navigation("MedicalRecords");
                 });
 
+            modelBuilder.Entity("Finals_Clinic_System.Models.ExternalDoctor", b =>
+                {
+                    b.Navigation("Referrals");
+                });
+
             modelBuilder.Entity("Finals_Clinic_System.Models.Patient", b =>
                 {
                     b.Navigation("Appointments");
 
+                    b.Navigation("Consultations");
+
+                    b.Navigation("ManualClinicLogs");
+
                     b.Navigation("MedicalRecords");
+
+                    b.Navigation("Prescriptions");
+
+                    b.Navigation("Referrals");
                 });
 #pragma warning restore 612, 618
         }
