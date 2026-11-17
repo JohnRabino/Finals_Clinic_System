@@ -6,13 +6,11 @@ public class MedicalRecord
 {
     [Key]
     public int RecordId { get; set; }
-
     public int PatientId { get; set; }
     public Patient Patient { get; set; } = null!;
 
-    public Consultation Consultation { get; set; } = null!;
-
-    public int ConsultationId { get; set; }
+    public int? ConsultationId { get; set; }
+    public Consultation? Consultation { get; set; }
 
     public int? DoctorId { get; set; }
     public Doctor? Doctor { get; set; }
