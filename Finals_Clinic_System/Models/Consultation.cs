@@ -10,6 +10,7 @@ public class Consultation
     public int? AppointmentId { get; set; }
     public Appointment? Appointment { get; set; }
 
+    public User Nurse { get; set; } = null!;
     public int NurseUserId { get; set; }
 
     public DateTime ConsultationDate { get; set; } = DateTime.Now;
