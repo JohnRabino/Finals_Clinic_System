@@ -13,6 +13,8 @@ public class ClinicDbContext : DbContext
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<MedicalRecord> MedicalRecords => Set<MedicalRecord>();
 
+    public DbSet<ExternalDoctor> ExternalDoctors => Set<ExternalDoctor>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
