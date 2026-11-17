@@ -1,7 +1,10 @@
-﻿namespace Finals_Clinic_System.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Finals_Clinic_System.Models;
 
 public class ClinicTimeSlot
 {
+    [Key]
     public int TimeSlotId { get; set; }
 
     public DateOnly SlotDate { get; set; }
