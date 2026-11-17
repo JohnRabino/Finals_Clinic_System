@@ -14,4 +14,7 @@ public class ManualClinicLog
 
     public int EncodedByUserId { get; set; }
     public DateTime EncodedAt { get; set; } = DateTime.Now;
+
+    public Patient? Patient { get; set; }
+    public User EncodedByUser { get; set; } = null!;
 }
