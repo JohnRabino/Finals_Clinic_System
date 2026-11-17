@@ -62,6 +62,10 @@ public class ClinicDbContext : DbContext
             .HasMaxLength(30);
 
         modelBuilder.Entity<User>()
+            .Property(u => u.StudentNumber)
+            .HasMaxLength(30);
+
+        modelBuilder.Entity<User>()
             .HasIndex(u => u.StudentNumber)
             .IsUnique()
             .HasFilter("[StudentNumber] IS NOT NULL");
