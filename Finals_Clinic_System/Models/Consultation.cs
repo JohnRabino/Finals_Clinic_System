@@ -10,8 +10,8 @@ public class Consultation
     public int? AppointmentId { get; set; }
     public Appointment? Appointment { get; set; }
 
-    public User Nurse { get; set; } = null!;
     public int NurseUserId { get; set; }
+    public User Nurse { get; set; } = null!;
 
     public DateTime ConsultationDate { get; set; } = DateTime.Now;
     public TimeOnly TimeIn { get; set; }
@@ -26,4 +26,10 @@ public class Consultation
     public string? AssistanceProvided { get; set; }
     public string? Notes { get; set; }
     public string? FollowUpInstructions { get; set; }
+
+    public ICollection<MedicalRecord> MedicalRecords { get; set; }
+        = new List<MedicalRecord>();
+
+    public ICollection<Prescription> Prescriptions { get; set; }
+        = new List<Prescription>();
 }
