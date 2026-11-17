@@ -211,10 +211,18 @@ namespace Finals_Clinic_System.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<string>("StudentNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.HasKey("UserId");
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("StudentNumber")
+                        .IsUnique()
+                        .HasFilter("[StudentNumber] IS NOT NULL");
 
                     b.ToTable("Users");
                 });
