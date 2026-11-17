@@ -1,12 +1,14 @@
 
 using System.Text;
+using System.Security.Claims;
 using Finals_Clinic_System.Data;
+using Finals_Clinic_System.Repositories;
+using Finals_Clinic_System.Repositories.Interfaces;
 using Finals_Clinic_System.Services;
 using Finals_Clinic_System.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,7 +74,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IExternalDoctorRepository, ExternalDoctorRepository>();
+builder.Services.AddScoped<IClinicTimeSlotRepository, ClinicTimeSlotRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IExternalDoctorService, ExternalDoctorService>();
+builder.Services.AddScoped<IClinicTimeSlotService, ClinicTimeSlotService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
 var app = builder.Build();
 
