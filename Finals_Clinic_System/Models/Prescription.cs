@@ -14,4 +14,7 @@ public class Prescription
     public string PrescribingDoctorName { get; set; } = string.Empty;
 
     public DateTime PrescriptionDate { get; set; } = DateTime.Now;
+
+    public Patient Patient { get; set; } = null!;
+    public Consultation Consultation { get; set; } = null!;
 }
