@@ -15,14 +15,14 @@ public class ReferralService : IReferralService
         _referralRepository = referralRepository;
     }
 
-    public async Task<List<Referral>> GetAllAsync()
+    public Task<List<Referral>> GetAllAsync()
     {
-        return await _referralRepository.GetAllAsync();
+        return _referralRepository.GetAllAsync();
     }
 
-    public async Task<List<Referral>> GetByPatientIdAsync(int patientId)
+    public Task<List<Referral>> GetByPatientIdAsync(int patientId)
     {
-        return await _referralRepository.GetByPatientIdAsync(patientId);
+        return _referralRepository.GetByPatientIdAsync(patientId);
     }
 
     public async Task<Referral?> CreateAsync(CreateReferralDto dto)
@@ -33,7 +33,7 @@ public class ReferralService : IReferralService
         if (!await _referralRepository.PatientExistsAsync(dto.PatientId))
             return null;
 
-        if (!await _referralRepository.ExternalDoctorExistsAsync(dto.ExternalDoctorId))
+        if (!await _referralRepository.ExternalDoctorIsActiveAsync(dto.ExternalDoctorId))
             return null;
 
         var referral = new Referral
