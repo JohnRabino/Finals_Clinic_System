@@ -23,6 +23,7 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
+
     public async Task<(bool Success, string Message, AuthResponseDto? Data)> RegisterAsync(RegisterDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.FullName) ||
@@ -34,48 +35,54 @@ public class AuthService : IAuthService
         }
 
         if (dto.Password.Length < 8)
-        {
             return (false, "Password must be at least 8 characters.", null);
-        }
 
         var email = dto.Email.Trim().ToLowerInvariant();
         var studentNumber = dto.StudentNumber.Trim();
 
         if (await _db.Users.AnyAsync(u => u.Email == email))
-        {
             return (false, "Email is already registered.", null);
-        }
 
         if (await _db.Users.AnyAsync(u => u.StudentNumber == studentNumber))
-        {
             return (false, "Student Number is already registered.", null);
+
+        using var transaction = await _db.Database.BeginTransactionAsync();
+
+        try
+        {
+            var user = new User
+            {
+                FullName = dto.FullName.Trim(),
+                StudentNumber = studentNumber,
+                Email = email,
+                Role = "Student",
+                IsActive = true
+            };
+
+            user.PasswordHash = _hasher.HashPassword(user, dto.Password);
+
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            var patient = new Patient
+            {
+                UserId = user.UserId,
+                FullName = user.FullName,
+                IsActive = true
+            };
+
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return (true, "Registration successful.", BuildResponse(user));
         }
-
-        var user = new User
+        catch
         {
-            FullName = dto.FullName.Trim(),
-            StudentNumber = studentNumber,
-            Email = email,
-            Role = "Student",
-            IsActive = true
-        };
-
-        user.PasswordHash = _hasher.HashPassword(user, dto.Password);
-
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
-
-        var patient = new Patient
-        {
-            UserId = user.UserId,
-            FullName = user.FullName,
-            IsActive = true
-        };
-
-        _db.Patients.Add(patient);
-        await _db.SaveChangesAsync();
-
-        return (true, "Registration successful.", BuildResponse(user));
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<(bool Success, string Message, AuthResponseDto? Data)> LoginAsync(LoginDto dto)
