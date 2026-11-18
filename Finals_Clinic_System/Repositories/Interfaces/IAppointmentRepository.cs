@@ -20,4 +20,8 @@ public interface IAppointmentRepository
     Task AddAsync(Appointment appointment);
 
     Task SaveChangesAsync();
+
+    Task<bool> PatientExistsAndActiveAsync(int patientId);
+
+    Task<bool> DoctorExistsAndActiveAsync(int doctorId);
 }
