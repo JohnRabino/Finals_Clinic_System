@@ -53,9 +53,24 @@ public class InitialAccountSeeder
                 db.Users.Add(user);
                 await db.SaveChangesAsync();
             }
+
             else if (user.Role != account.Role)
             {
                 throw new Exception($"Role mismatch for {email}.");
+            }
+            else
+            {
+                var verification = hasher.VerifyHashedPassword(
+                    user,
+                    user.PasswordHash,
+                    account.Password
+                );
+
+                if (verification == PasswordVerificationResult.Failed)
+                {
+                    user.PasswordHash = hasher.HashPassword(user, account.Password);
+                    await db.SaveChangesAsync();
+                }
             }
 
             if (account.Role == "Student")
