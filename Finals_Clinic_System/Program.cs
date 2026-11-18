@@ -77,13 +77,17 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IExternalDoctorRepository, ExternalDoctorRepository>();
 builder.Services.AddScoped<IClinicTimeSlotRepository, ClinicTimeSlotRepository>();
+builder.Services.AddScoped<IConsultationRepository, ConsultationRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IExternalDoctorService, ExternalDoctorService>();
 builder.Services.AddScoped<IClinicTimeSlotService, ClinicTimeSlotService>();
+builder.Services.AddScoped<IConsultationService, ConsultationService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
 
 var app = builder.Build();
 
