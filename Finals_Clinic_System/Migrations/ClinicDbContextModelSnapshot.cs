@@ -58,7 +58,7 @@ namespace Finals_Clinic_System.Migrations
 
                     b.HasIndex("TimeSlotId");
 
-                    b.ToTable("Appointments");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.ClinicTimeSlot", b =>
@@ -83,7 +83,7 @@ namespace Finals_Clinic_System.Migrations
 
                     b.HasKey("TimeSlotId");
 
-                    b.ToTable("ClinicTimeSlots");
+                    b.ToTable("ClinicTimeSlots", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.Consultation", b =>
@@ -113,6 +113,15 @@ namespace Finals_Clinic_System.Migrations
                     b.Property<DateTime>("ConsultationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DoctorAssessment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DoctorReviewedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FollowUpInstructions")
                         .HasColumnType("nvarchar(max)");
 
@@ -139,11 +148,13 @@ namespace Finals_Clinic_System.Migrations
 
                     b.HasIndex("AppointmentId");
 
+                    b.HasIndex("DoctorId");
+
                     b.HasIndex("NurseUserId");
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Consultations");
+                    b.ToTable("Consultations", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.Doctor", b =>
@@ -161,9 +172,19 @@ namespace Finals_Clinic_System.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Specialty")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("DoctorId");
 
-                    b.ToTable("Doctors");
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.ExternalDoctor", b =>
@@ -198,7 +219,7 @@ namespace Finals_Clinic_System.Migrations
 
                     b.HasKey("ExternalDoctorId");
 
-                    b.ToTable("ExternalDoctors");
+                    b.ToTable("ExternalDoctors", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.ManualClinicLog", b =>
@@ -238,7 +259,7 @@ namespace Finals_Clinic_System.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("ManualClinicLogs");
+                    b.ToTable("ManualClinicLogs", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.MedicalRecord", b =>
@@ -285,7 +306,7 @@ namespace Finals_Clinic_System.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("MedicalRecords");
+                    b.ToTable("MedicalRecords", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.Patient", b =>
@@ -312,7 +333,7 @@ namespace Finals_Clinic_System.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.Prescription", b =>
@@ -354,7 +375,7 @@ namespace Finals_Clinic_System.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Prescriptions");
+                    b.ToTable("Prescriptions", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.Referral", b =>
@@ -364,6 +385,9 @@ namespace Finals_Clinic_System.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReferralId"));
+
+                    b.Property<string>("Diagnosis")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ExternalDoctorId")
                         .HasColumnType("int");
@@ -381,10 +405,22 @@ namespace Finals_Clinic_System.Migrations
                     b.Property<DateTime>("ReferralDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ResponseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReturnedFindings")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReturnedPrescription")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Treatment")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ReferralId");
 
@@ -392,7 +428,7 @@ namespace Finals_Clinic_System.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Referrals");
+                    b.ToTable("Referrals", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.User", b =>
@@ -436,7 +472,7 @@ namespace Finals_Clinic_System.Migrations
                         .IsUnique()
                         .HasFilter("[StudentNumber] IS NOT NULL");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.Appointment", b =>
@@ -472,6 +508,11 @@ namespace Finals_Clinic_System.Migrations
                         .HasForeignKey("AppointmentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("Finals_Clinic_System.Models.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Finals_Clinic_System.Models.User", "Nurse")
                         .WithMany()
                         .HasForeignKey("NurseUserId")
@@ -486,9 +527,22 @@ namespace Finals_Clinic_System.Migrations
 
                     b.Navigation("Appointment");
 
+                    b.Navigation("Doctor");
+
                     b.Navigation("Nurse");
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("Finals_Clinic_System.Models.Doctor", b =>
+                {
+                    b.HasOne("Finals_Clinic_System.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Finals_Clinic_System.Models.ManualClinicLog", b =>
