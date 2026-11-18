@@ -8,5 +8,5 @@ public interface IPrescriptionService
 {
     Task<List<Prescription>> GetAllAsync();
     Task<List<Prescription>> GetByPatientIdAsync(int patientId);
-    Task<Prescription?> CreateAsync(CreatePrescriptionDto dto);
+    Task<Prescription?> CreateAsync(CreatePrescriptionDto dto, int? doctorUserId);
 }
