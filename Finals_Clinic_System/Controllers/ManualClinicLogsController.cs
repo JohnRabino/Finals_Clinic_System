@@ -22,18 +22,42 @@ public class ManualClinicLogsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _service.GetAllAsync());
+        var logs = await _service.GetAllAsync();
+
+        return Ok(logs.Select(l => new
+        {
+            l.ManualLogId,
+            l.PatientId,
+            l.PatientName,
+            l.VisitDate,
+            l.Complaint,
+            l.Notes,
+            l.EncodedByUserId,
+            NurseName = l.EncodedByUser?.FullName,
+            l.EncodedAt
+        }));
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var log = await _service.GetByIdAsync(id);
 
         if (log == null)
-            return NotFound("Manual clinic log not found.");
+            return NotFound(new { message = "Manual clinic log not found." });
 
-        return Ok(log);
+        return Ok(new
+        {
+            log.ManualLogId,
+            log.PatientId,
+            log.PatientName,
+            log.VisitDate,
+            log.Complaint,
+            log.Notes,
+            log.EncodedByUserId,
+            NurseName = log.EncodedByUser?.FullName,
+            log.EncodedAt
+        });
     }
 
     [HttpPost]
@@ -42,13 +66,31 @@ public class ManualClinicLogsController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (!int.TryParse(userIdClaim, out int nurseUserId))
-            return Unauthorized("Nurse user ID was not found in the token.");
+            return Unauthorized(new { message = "Nurse user ID was not found in the token." });
 
         var log = await _service.CreateAsync(dto, nurseUserId);
 
         if (log == null)
-            return BadRequest("Invalid patient or manual clinic log details.");
+            return BadRequest(new
+            {
+                message = "Invalid patient or manual clinic log details."
+            });
 
-        return Ok(log);
+        return Ok(new
+        {
+            message = "Manual clinic log created successfully.",
+            data = new
+            {
+                log.ManualLogId,
+                log.PatientId,
+                log.PatientName,
+                log.VisitDate,
+                log.Complaint,
+                log.Notes,
+                log.EncodedByUserId,
+                NurseName = log.EncodedByUser?.FullName,
+                log.EncodedAt
+            }
+        });
     }
 }
