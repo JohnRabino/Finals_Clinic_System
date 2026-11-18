@@ -15,26 +15,28 @@ public class ManualClinicLogRepository : IManualClinicLogRepository
         _context = context;
     }
 
-    public async Task<List<ManualClinicLog>> GetAllAsync()
+    public Task<List<ManualClinicLog>> GetAllAsync()
     {
-        return await _context.ManualClinicLogs
+        return _context.ManualClinicLogs
+            .AsNoTracking()
             .Include(l => l.Patient)
             .Include(l => l.EncodedByUser)
             .OrderByDescending(l => l.VisitDate)
             .ToListAsync();
     }
 
-    public async Task<ManualClinicLog?> GetByIdAsync(int id)
+    public Task<ManualClinicLog?> GetByIdAsync(int id)
     {
-        return await _context.ManualClinicLogs
+        return _context.ManualClinicLogs
+            .AsNoTracking()
             .Include(l => l.Patient)
             .Include(l => l.EncodedByUser)
             .FirstOrDefaultAsync(l => l.ManualLogId == id);
     }
 
-    public async Task<bool> PatientExistsAsync(int patientId)
+    public Task<bool> PatientExistsAsync(int patientId)
     {
-        return await _context.Patients
+        return _context.Patients
             .AnyAsync(p => p.PatientId == patientId);
     }
 
@@ -43,8 +45,8 @@ public class ManualClinicLogRepository : IManualClinicLogRepository
         await _context.ManualClinicLogs.AddAsync(log);
     }
 
-    public async Task SaveAsync()
+    public Task SaveAsync()
     {
-        await _context.SaveChangesAsync();
+        return _context.SaveChangesAsync();
     }
 }
