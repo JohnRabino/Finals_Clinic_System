@@ -70,6 +70,32 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(jwtKey)),
             RoleClaimType = ClaimTypes.Role
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var value = context.Principal?
+                    .FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (!int.TryParse(value, out var userId))
+                {
+                    context.Fail("Invalid user.");
+                    return;
+                }
+
+                var db = context.HttpContext.RequestServices
+                    .GetRequiredService<ClinicDbContext>();
+
+                var user = await db.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                if (user == null || !user.IsActive)
+                {
+                    context.Fail("Account is inactive.");
+                }
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -83,7 +109,9 @@ builder.Services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
 builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
 builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
 builder.Services.AddScoped<IManualClinicLogRepository, ManualClinicLogRepository>();
+builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
 
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IManualClinicLogService, ManualClinicLogService>();
 builder.Services.AddScoped<IReferralService, ReferralService>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
@@ -96,6 +124,8 @@ builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
 
 var app = builder.Build();
+
+await InitialAccountSeeder.SeedAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {
