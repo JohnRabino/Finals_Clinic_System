@@ -10,6 +10,7 @@ public interface IReferralRepository
     Task<Referral?> GetByIdAsync(int id);
     Task<bool> PatientExistsAsync(int patientId);
     Task<bool> ExternalDoctorExistsAsync(int externalDoctorId);
+    Task<bool> ExternalDoctorIsActiveAsync(int externalDoctorId);
     Task AddAsync(Referral referral);
     Task SaveAsync();
 }
