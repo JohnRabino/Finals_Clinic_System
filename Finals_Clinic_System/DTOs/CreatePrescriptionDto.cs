@@ -9,5 +9,4 @@ public class CreatePrescriptionDto
     public string Dosage { get; set; } = string.Empty;
     public string Instructions { get; set; } = string.Empty;
 
-    public string PrescribingDoctorName { get; set; } = string.Empty;
 }
