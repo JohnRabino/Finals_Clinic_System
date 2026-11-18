@@ -15,14 +15,14 @@ public class ManualClinicLogService : IManualClinicLogService
         _repository = repository;
     }
 
-    public async Task<List<ManualClinicLog>> GetAllAsync()
+    public Task<List<ManualClinicLog>> GetAllAsync()
     {
-        return await _repository.GetAllAsync();
+        return _repository.GetAllAsync();
     }
 
-    public async Task<ManualClinicLog?> GetByIdAsync(int id)
+    public Task<ManualClinicLog?> GetByIdAsync(int id)
     {
-        return await _repository.GetByIdAsync(id);
+        return _repository.GetByIdAsync(id);
     }
 
     public async Task<ManualClinicLog?> CreateAsync(
@@ -31,7 +31,8 @@ public class ManualClinicLogService : IManualClinicLogService
     {
         if (string.IsNullOrWhiteSpace(dto.PatientName) ||
             string.IsNullOrWhiteSpace(dto.Complaint) ||
-            dto.VisitDate == DateTime.MinValue)
+            dto.VisitDate == DateTime.MinValue ||
+            dto.VisitDate.Date > DateTime.Today)
         {
             return null;
         }
@@ -45,9 +46,9 @@ public class ManualClinicLogService : IManualClinicLogService
         var log = new ManualClinicLog
         {
             PatientId = dto.PatientId,
-            PatientName = dto.PatientName,
+            PatientName = dto.PatientName.Trim(),
             VisitDate = dto.VisitDate,
-            Complaint = dto.Complaint,
+            Complaint = dto.Complaint.Trim(),
             Notes = dto.Notes,
             EncodedByUserId = nurseUserId,
             EncodedAt = DateTime.Now
