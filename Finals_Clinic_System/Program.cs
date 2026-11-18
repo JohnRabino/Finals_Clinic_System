@@ -110,7 +110,9 @@ builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
 builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
 builder.Services.AddScoped<IManualClinicLogRepository, ManualClinicLogRepository>();
 builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IManualClinicLogService, ManualClinicLogService>();
 builder.Services.AddScoped<IReferralService, ReferralService>();
