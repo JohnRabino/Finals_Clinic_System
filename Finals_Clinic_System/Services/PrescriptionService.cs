@@ -22,21 +22,21 @@ public class PrescriptionService : IPrescriptionService
         _consultationRepository = consultationRepository;
     }
 
-    public async Task<List<Prescription>> GetAllAsync()
+    public Task<List<Prescription>> GetAllAsync()
     {
-        return await _prescriptionRepository.GetAllAsync();
+        return _prescriptionRepository.GetAllAsync();
     }
 
-    public async Task<List<Prescription>> GetByPatientIdAsync(int patientId)
+    public Task<List<Prescription>> GetByPatientIdAsync(int patientId)
     {
-        return await _prescriptionRepository.GetByPatientIdAsync(patientId);
+        return _prescriptionRepository.GetByPatientIdAsync(patientId);
     }
 
-    public async Task<Prescription?> CreateAsync(CreatePrescriptionDto dto)
+    public async Task<Prescription?> CreateAsync(
+        CreatePrescriptionDto dto, int? doctorUserId)
     {
         if (string.IsNullOrWhiteSpace(dto.MedicineName) ||
-            string.IsNullOrWhiteSpace(dto.Dosage) ||
-            string.IsNullOrWhiteSpace(dto.PrescribingDoctorName))
+            string.IsNullOrWhiteSpace(dto.Dosage))
         {
             return null;
         }
@@ -51,14 +51,23 @@ public class PrescriptionService : IPrescriptionService
         if (consultation == null || consultation.PatientId != dto.PatientId)
             return null;
 
+        if (consultation.Doctor == null)
+            return null;
+
+        if (doctorUserId.HasValue &&
+            consultation.Doctor.UserId != doctorUserId.Value)
+        {
+            return null;
+        }
+
         var prescription = new Prescription
         {
-            PatientId = dto.PatientId,
-            ConsultationId = dto.ConsultationId,
+            PatientId = consultation.PatientId,
+            ConsultationId = consultation.ConsultationId,
             MedicineName = dto.MedicineName,
             Dosage = dto.Dosage,
             Instructions = dto.Instructions,
-            PrescribingDoctorName = dto.PrescribingDoctorName,
+            PrescribingDoctorName = consultation.Doctor.FullName,
             PrescriptionDate = DateTime.Now
         };
 
