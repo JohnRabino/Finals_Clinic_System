@@ -1,9 +1,11 @@
-﻿namespace Finals_Clinic_System.DTOs;
+﻿
+namespace Finals_Clinic_System.DTOs;
 
 public class CreateConsultationDto
 {
     public int PatientId { get; set; }
     public int? AppointmentId { get; set; }
+    public int? DoctorId { get; set; }
 
     public string Complaint { get; set; } = string.Empty;
 
