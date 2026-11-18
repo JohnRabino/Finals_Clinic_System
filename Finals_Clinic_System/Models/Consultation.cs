@@ -1,4 +1,5 @@
-﻿namespace Finals_Clinic_System.Models;
+﻿
+namespace Finals_Clinic_System.Models;
 
 public class Consultation
 {
@@ -13,6 +14,9 @@ public class Consultation
     public int NurseUserId { get; set; }
     public User Nurse { get; set; } = null!;
 
+    public int? DoctorId { get; set; }
+    public Doctor? Doctor { get; set; }
+
     public DateTime ConsultationDate { get; set; } = DateTime.Now;
     public TimeOnly TimeIn { get; set; }
     public TimeOnly? TimeOut { get; set; }
@@ -26,6 +30,9 @@ public class Consultation
     public string? AssistanceProvided { get; set; }
     public string? Notes { get; set; }
     public string? FollowUpInstructions { get; set; }
+
+    public string? DoctorAssessment { get; set; }
+    public DateTime? DoctorReviewedAt { get; set; }
 
     public ICollection<MedicalRecord> MedicalRecords { get; set; }
         = new List<MedicalRecord>();
