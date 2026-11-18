@@ -22,7 +22,6 @@ public class ConsultationRepository : IConsultationRepository
             .Include(c => c.Patient)
             .Include(c => c.Nurse)
             .Include(c => c.Doctor)
-                .ThenInclude(d => d!.User)
             .OrderByDescending(c => c.ConsultationDate)
             .ToListAsync();
     }
