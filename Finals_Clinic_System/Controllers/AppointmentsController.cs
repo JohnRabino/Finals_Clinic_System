@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿
+using System.Security.Claims;
 using Finals_Clinic_System.DTOs;
 using Finals_Clinic_System.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -27,7 +28,21 @@ public class AppointmentsController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var appointments = await _appointmentService.GetAllAsync();
-        return Ok(appointments);
+
+        return Ok(appointments.Select(a => new
+        {
+            a.AppointmentId,
+            a.PatientId,
+            PatientName = a.Patient?.FullName,
+            a.DoctorId,
+            DoctorName = a.Doctor?.FullName,
+            a.TimeSlotId,
+            a.TimeSlot.SlotDate,
+            a.TimeSlot.StartTime,
+            a.TimeSlot.EndTime,
+            a.Status,
+            a.Reason
+        }));
     }
 
     [HttpGet("my")]
@@ -35,7 +50,6 @@ public class AppointmentsController : ControllerBase
     public async Task<IActionResult> GetMyAppointments()
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
         var patient = await _patientService.GetByUserIdAsync(userId);
 
         if (patient == null)
@@ -43,7 +57,18 @@ public class AppointmentsController : ControllerBase
 
         var appointments = await _appointmentService.GetByPatientIdAsync(patient.PatientId);
 
-        return Ok(appointments);
+        return Ok(appointments.Select(a => new
+        {
+            a.AppointmentId,
+            a.TimeSlotId,
+            a.TimeSlot.SlotDate,
+            a.TimeSlot.StartTime,
+            a.TimeSlot.EndTime,
+            a.DoctorId,
+            DoctorName = a.Doctor?.FullName,
+            a.Status,
+            a.Reason
+        }));
     }
 
     [HttpPost]
@@ -51,7 +76,6 @@ public class AppointmentsController : ControllerBase
     public async Task<IActionResult> Create(CreateAppointmentDto dto)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
         var patient = await _patientService.GetByUserIdAsync(userId);
 
         if (patient == null)
