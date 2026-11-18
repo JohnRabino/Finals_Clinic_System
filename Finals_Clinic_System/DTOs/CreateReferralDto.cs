@@ -1,4 +1,5 @@
-﻿namespace Finals_Clinic_System.DTOs;
+﻿
+namespace Finals_Clinic_System.DTOs;
 
 public class CreateReferralDto
 {
