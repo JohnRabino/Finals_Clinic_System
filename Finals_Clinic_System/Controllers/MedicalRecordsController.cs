@@ -28,7 +28,21 @@ public class MedicalRecordsController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var records = await _service.GetAllAsync();
-        return Ok(records);
+
+        return Ok(records.Select(r => new
+        {
+            r.RecordId,
+            r.PatientId,
+            PatientName = r.Patient?.FullName,
+            r.ConsultationId,
+            r.AppointmentId,
+            r.DoctorId,
+            DoctorName = r.Doctor?.FullName,
+            r.Diagnosis,
+            r.Treatment,
+            r.Notes,
+            r.RecordDate
+        }));
     }
 
     [HttpGet("my")]
@@ -36,7 +50,6 @@ public class MedicalRecordsController : ControllerBase
     public async Task<IActionResult> GetMyRecords()
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
         var patient = await _patientService.GetByUserIdAsync(userId);
 
         if (patient == null)
@@ -44,7 +57,18 @@ public class MedicalRecordsController : ControllerBase
 
         var records = await _service.GetByPatientIdAsync(patient.PatientId);
 
-        return Ok(records);
+        return Ok(records.Select(r => new
+        {
+            r.RecordId,
+            r.ConsultationId,
+            r.AppointmentId,
+            r.DoctorId,
+            DoctorName = r.Doctor?.FullName,
+            r.Diagnosis,
+            r.Treatment,
+            r.Notes,
+            r.RecordDate
+        }));
     }
 
     [HttpPost]
