@@ -56,4 +56,20 @@ public class AppointmentRepository : IAppointmentRepository
 
     public Task SaveChangesAsync() =>
         _context.SaveChangesAsync();
+
+    public Task<bool> PatientExistsAndActiveAsync(int patientId)
+    {
+        return _context.Patients.AnyAsync(p =>
+            p.PatientId == patientId &&
+            p.IsActive &&
+            (p.UserId == null || p.User!.IsActive));
+    }
+
+    public Task<bool> DoctorExistsAndActiveAsync(int doctorId)
+    {
+        return _context.Doctors.AnyAsync(d =>
+            d.DoctorId == doctorId &&
+            d.IsActive &&
+            d.User.IsActive);
+    }
 }
