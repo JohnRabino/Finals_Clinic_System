@@ -1,4 +1,5 @@
-﻿using Finals_Clinic_System.Data;
+﻿
+using Finals_Clinic_System.Data;
 using Finals_Clinic_System.Models;
 using Finals_Clinic_System.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,17 @@ public class ClinicTimeSlotRepository : IClinicTimeSlotRepository
     public Task<ClinicTimeSlot?> GetByIdAsync(int id) =>
         _context.ClinicTimeSlots
             .FirstOrDefaultAsync(s => s.TimeSlotId == id);
+
+    public Task<bool> HasOverlapAsync(
+        DateOnly date,
+        TimeOnly startTime,
+        TimeOnly endTime)
+    {
+        return _context.ClinicTimeSlots.AnyAsync(s =>
+            s.SlotDate == date &&
+            s.StartTime < endTime &&
+            s.EndTime > startTime);
+    }
 
     public async Task AddAsync(ClinicTimeSlot timeSlot) =>
         await _context.ClinicTimeSlots.AddAsync(timeSlot);
