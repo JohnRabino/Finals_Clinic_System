@@ -155,5 +155,22 @@ public class ClinicDbContext : DbContext
         modelBuilder.Entity<Consultation>()
             .Property(c => c.Temperature)
             .HasPrecision(5, 2);
+
+        modelBuilder.Entity<Doctor>()
+            .HasOne(d => d.User)
+            .WithMany()
+            .HasForeignKey(d => d.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Doctor>()
+            .HasIndex(d => d.UserId)
+            .IsUnique();
+
+        modelBuilder.Entity<Consultation>()
+            .HasOne(c => c.Doctor)
+            .WithMany()
+            .HasForeignKey(c => c.DoctorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 }
