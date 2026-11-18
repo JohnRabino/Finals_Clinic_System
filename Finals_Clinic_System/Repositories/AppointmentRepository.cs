@@ -37,6 +37,20 @@ public class AppointmentRepository : IAppointmentRepository
             .Include(a => a.TimeSlot)
             .FirstOrDefaultAsync(a => a.AppointmentId == id);
 
+    public Task<bool> HasDoctorConflictAsync(
+    int doctorId,
+    DateOnly slotDate,
+    TimeOnly startTime,
+    TimeOnly endTime)
+    {
+        return _context.Appointments.AnyAsync(a =>
+            a.DoctorId == doctorId &&
+            a.Status != "Cancelled" &&
+            a.TimeSlot.SlotDate == slotDate &&
+            a.TimeSlot.StartTime < endTime &&
+            a.TimeSlot.EndTime > startTime);
+    }
+
     public async Task AddAsync(Appointment appointment) =>
         await _context.Appointments.AddAsync(appointment);
 
