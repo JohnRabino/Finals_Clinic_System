@@ -21,8 +21,16 @@ public class PatientService : IPatientService
     public Task<Patient?> GetByIdAsync(int id) =>
         _repository.GetByIdAsync(id);
 
-    public Task<Patient?> GetByUserIdAsync(int userId) =>
-        _repository.GetByUserIdAsync(userId);
+    public async Task<Patient?> GetByUserIdAsync(int userId)
+    {
+        var patient = await _repository.GetByUserIdAsync(userId);
+
+        if (patient == null || !patient.IsActive ||
+            patient.User == null || !patient.User.IsActive)
+            return null;
+
+        return patient;
+    }
 
     public async Task<(bool Success, string Message, Patient? Data)>
         CreateAsync(PatientCreateDto dto)
