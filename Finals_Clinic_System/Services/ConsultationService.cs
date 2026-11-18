@@ -71,6 +71,21 @@ public class ConsultationService : IConsultationService
             }
         }
 
+        if (doctorId.HasValue)
+        {
+            var doctorExists = await _appointmentRepository
+                .DoctorExistsAndActiveAsync(doctorId.Value);
+
+            if (!doctorExists)
+                return (false, "Doctor not found or inactive.");
+        }
+
+        var patientExists = await _appointmentRepository
+            .PatientExistsAndActiveAsync(dto.PatientId);
+
+        if (!patientExists)
+            return (false, "Patient not found or inactive.");
+
         var consultation = new Consultation
         {
             PatientId = dto.PatientId,
@@ -92,6 +107,8 @@ public class ConsultationService : IConsultationService
         await _repository.SaveChangesAsync();
 
         return (true, "Consultation recorded successfully.");
+
+
     }
 
     public async Task<(bool Success, string Message)> SubmitDoctorAssessmentAsync(
@@ -135,6 +152,12 @@ public class ConsultationService : IConsultationService
 
         if (consultation.TimeOut.HasValue)
             return (false, "Consultation is already completed.");
+
+        if (consultation.DoctorId.HasValue &&
+            !consultation.DoctorReviewedAt.HasValue)
+        {
+            return (false, "Doctor assessment is required before completing this consultation.");
+        }
 
         consultation.TimeOut = TimeOnly.FromDateTime(DateTime.Now);
 
