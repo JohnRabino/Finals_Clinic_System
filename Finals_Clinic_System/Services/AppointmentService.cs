@@ -31,6 +31,21 @@ public class AppointmentService : IAppointmentService
 
     public async Task<(bool Success, string Message)> CreateAsync(CreateAppointmentDto dto)
     {
+        var patientExists = await _appointmentRepository
+            .PatientExistsAndActiveAsync(dto.PatientId);
+
+        if (!patientExists)
+            return (false, "Patient not found or inactive.");
+
+        if (dto.DoctorId.HasValue)
+        {
+            var doctorExists = await _appointmentRepository
+                .DoctorExistsAndActiveAsync(dto.DoctorId.Value);
+
+            if (!doctorExists)
+                return (false, "Doctor not found or inactive.");
+        }
+
         var timeSlot = await _timeSlotRepository.GetByIdAsync(dto.TimeSlotId);
 
         if (timeSlot == null || !timeSlot.IsAvailable)
