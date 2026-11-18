@@ -53,8 +53,11 @@ public class ConsultationService : IConsultationService
             if (appointment.PatientId != dto.PatientId)
                 return (false, "Appointment does not belong to this patient.");
 
-            if (appointment.Status == "Cancelled")
-                return (false, "Cannot create consultation for a cancelled appointment.");
+            if (appointment.Status == "Cancelled" ||
+                appointment.Status == "Completed")
+            {
+                return (false, "Cannot create consultation for this appointment.");
+            }
 
             if (appointment.DoctorId.HasValue)
             {
@@ -104,6 +107,9 @@ public class ConsultationService : IConsultationService
         {
             return (false, "You are not assigned to this consultation.");
         }
+
+        if (consultation.TimeOut.HasValue)
+            return (false, "Cannot update a completed consultation.");
 
         if (consultation.DoctorReviewedAt.HasValue)
             return (false, "Doctor assessment has already been submitted.");
