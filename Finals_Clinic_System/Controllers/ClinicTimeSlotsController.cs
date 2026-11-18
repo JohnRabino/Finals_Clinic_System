@@ -1,4 +1,5 @@
-﻿using Finals_Clinic_System.DTOs;
+﻿
+using Finals_Clinic_System.DTOs;
 using Finals_Clinic_System.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,15 @@ public class ClinicTimeSlotsController : ControllerBase
     public async Task<IActionResult> GetAvailable([FromQuery] DateOnly? date)
     {
         var slots = await _service.GetAvailableAsync(date);
-        return Ok(slots);
+
+        return Ok(slots.Select(s => new
+        {
+            s.TimeSlotId,
+            s.SlotDate,
+            s.StartTime,
+            s.EndTime,
+            s.IsAvailable
+        }));
     }
 
     [HttpPost]
