@@ -1,4 +1,5 @@
-﻿namespace Finals_Clinic_System.Models;
+﻿
+namespace Finals_Clinic_System.Models;
 
 public class Referral
 {
@@ -14,6 +15,12 @@ public class Referral
     public string? Notes { get; set; }
 
     public string Status { get; set; } = "Pending";
+
+    public string? ReturnedFindings { get; set; }
+    public string? Diagnosis { get; set; }
+    public string? Treatment { get; set; }
+    public string? ReturnedPrescription { get; set; }
+    public DateTime? ResponseDate { get; set; }
 
     public DateTime ReferralDate { get; set; } = DateTime.Now;
 }
