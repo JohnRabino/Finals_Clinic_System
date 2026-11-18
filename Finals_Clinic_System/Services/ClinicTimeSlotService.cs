@@ -1,4 +1,5 @@
-﻿using Finals_Clinic_System.DTOs;
+﻿
+using Finals_Clinic_System.DTOs;
 using Finals_Clinic_System.Models;
 using Finals_Clinic_System.Repositories.Interfaces;
 using Finals_Clinic_System.Services.Interfaces;
@@ -19,13 +20,28 @@ public class ClinicTimeSlotService : IClinicTimeSlotService
         return _repository.GetAvailableAsync(date);
     }
 
-    public async Task<(bool Success, string Message)> CreateAsync(CreateClinicTimeSlotDto dto)
+    public async Task<(bool Success, string Message)> CreateAsync(
+        CreateClinicTimeSlotDto dto)
     {
-        if (dto.SlotDate < DateOnly.FromDateTime(DateTime.Today))
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+
+        if (dto.SlotDate < today)
             return (false, "Cannot create a time slot for a past date.");
+
+        if (dto.SlotDate == today && dto.StartTime <= currentTime)
+            return (false, "Cannot create a time slot for a past time.");
 
         if (dto.EndTime <= dto.StartTime)
             return (false, "End time must be later than start time.");
+
+        var hasOverlap = await _repository.HasOverlapAsync(
+            dto.SlotDate,
+            dto.StartTime,
+            dto.EndTime);
+
+        if (hasOverlap)
+            return (false, "This time slot overlaps with an existing schedule.");
 
         var timeSlot = new ClinicTimeSlot
         {
