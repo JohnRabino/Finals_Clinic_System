@@ -32,7 +32,7 @@ public class ManualClinicLogService : IManualClinicLogService
         if (string.IsNullOrWhiteSpace(dto.PatientName) ||
             string.IsNullOrWhiteSpace(dto.Complaint) ||
             dto.VisitDate == DateTime.MinValue ||
-            dto.VisitDate.Date > DateTime.Today)
+            dto.VisitDate > DateTime.Now)
         {
             return null;
         }
