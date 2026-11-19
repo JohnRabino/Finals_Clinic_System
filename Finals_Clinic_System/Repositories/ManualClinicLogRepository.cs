@@ -37,7 +37,7 @@ public class ManualClinicLogRepository : IManualClinicLogRepository
     public Task<bool> PatientExistsAsync(int patientId)
     {
         return _context.Patients
-            .AnyAsync(p => p.PatientId == patientId);
+            .AnyAsync(p => p.PatientId == patientId && p.IsActive);
     }
 
     public async Task AddAsync(ManualClinicLog log)
