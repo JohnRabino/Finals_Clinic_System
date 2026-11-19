@@ -25,6 +25,11 @@ public class ReferralService : IReferralService
         return _referralRepository.GetByPatientIdAsync(patientId);
     }
 
+    public Task<Referral?> GetByIdAsync(int id)
+    {
+        return _referralRepository.GetByIdAsync(id);
+    }
+
     public async Task<Referral?> CreateAsync(CreateReferralDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Reason))
@@ -40,8 +45,8 @@ public class ReferralService : IReferralService
         {
             PatientId = dto.PatientId,
             ExternalDoctorId = dto.ExternalDoctorId,
-            Reason = dto.Reason,
-            Notes = dto.Notes,
+            Reason = dto.Reason.Trim(),
+            Notes = dto.Notes?.Trim(),
             Status = "Pending",
             ReferralDate = DateTime.Now
         };
