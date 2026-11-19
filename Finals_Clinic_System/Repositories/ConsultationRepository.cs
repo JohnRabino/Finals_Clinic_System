@@ -1,5 +1,4 @@
-﻿
-using Finals_Clinic_System.Data;
+﻿using Finals_Clinic_System.Data;
 using Finals_Clinic_System.Models;
 using Finals_Clinic_System.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -17,21 +16,21 @@ public class ConsultationRepository : IConsultationRepository
 
     public Task<List<Consultation>> GetAllAsync()
     {
-        return _context.Consultations
-            .AsNoTracking()
+        return _context.Consultations.AsNoTracking()
             .Include(c => c.Patient)
             .Include(c => c.Nurse)
             .Include(c => c.Doctor)
+            .Include(c => c.Appointment)
             .OrderByDescending(c => c.ConsultationDate)
             .ToListAsync();
     }
 
     public Task<List<Consultation>> GetByPatientIdAsync(int patientId)
     {
-        return _context.Consultations
-            .AsNoTracking()
+        return _context.Consultations.AsNoTracking()
             .Include(c => c.Nurse)
             .Include(c => c.Doctor)
+            .Include(c => c.Appointment)
             .Where(c => c.PatientId == patientId)
             .OrderByDescending(c => c.ConsultationDate)
             .ToListAsync();
@@ -39,11 +38,11 @@ public class ConsultationRepository : IConsultationRepository
 
     public Task<List<Consultation>> GetByDoctorUserIdAsync(int userId)
     {
-        return _context.Consultations
-            .AsNoTracking()
+        return _context.Consultations.AsNoTracking()
             .Include(c => c.Patient)
             .Include(c => c.Nurse)
             .Include(c => c.Doctor)
+            .Include(c => c.Appointment)
             .Where(c => c.Doctor != null && c.Doctor.UserId == userId)
             .OrderByDescending(c => c.ConsultationDate)
             .ToListAsync();
@@ -55,12 +54,19 @@ public class ConsultationRepository : IConsultationRepository
             .Include(c => c.Patient)
             .Include(c => c.Nurse)
             .Include(c => c.Doctor)
+            .Include(c => c.Appointment)
+                .ThenInclude(a => a!.TimeSlot)
             .FirstOrDefaultAsync(c => c.ConsultationId == id);
     }
 
-    public async Task AddAsync(Consultation consultation)
+    public Task<bool> HasAppointmentConsultationAsync(int appointmentId)
     {
-        await _context.Consultations.AddAsync(consultation);
+        return _context.Consultations.AnyAsync(c => c.AppointmentId == appointmentId);
+    }
+
+    public Task AddAsync(Consultation consultation)
+    {
+        return _context.Consultations.AddAsync(consultation).AsTask();
     }
 
     public Task SaveChangesAsync()
