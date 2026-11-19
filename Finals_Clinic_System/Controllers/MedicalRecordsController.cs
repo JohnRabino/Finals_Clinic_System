@@ -45,6 +45,31 @@ public class MedicalRecordsController : ControllerBase
         }));
     }
 
+    [HttpGet("{id:int}")]
+    [Authorize(Roles = "Nurse")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var record = await _service.GetByIdAsync(id);
+
+        if (record == null)
+            return NotFound(new { message = "Medical record not found." });
+
+        return Ok(new
+        {
+            record.RecordId,
+            record.PatientId,
+            PatientName = record.Patient?.FullName,
+            record.ConsultationId,
+            record.AppointmentId,
+            record.DoctorId,
+            DoctorName = record.Doctor?.FullName,
+            record.Diagnosis,
+            record.Treatment,
+            record.Notes,
+            record.RecordDate
+        });
+    }
+
     [HttpGet("my")]
     [Authorize(Roles = "Student")]
     public async Task<IActionResult> GetMyRecords()
@@ -71,6 +96,31 @@ public class MedicalRecordsController : ControllerBase
         }));
     }
 
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Nurse")]
+    public async Task<IActionResult> Update(int id, UpdateMedicalRecordDto dto)
+    {
+        var result = await _service.UpdateAsync(id, dto);
+        if (!result.Success)
+        {
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { message = result.Message });
+            return BadRequest(new { message = result.Message });
+        }
+
+        return Ok(new { message = result.Message });
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Nurse")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        if (!await _service.DeleteAsync(id))
+            return NotFound(new { message = "Medical record not found." });
+
+        return Ok(new { message = "Medical record deleted. Use this only to correct an erroneous entry." });
+    }
+
     [HttpPost]
     [Authorize(Roles = "Nurse")]
     public async Task<IActionResult> Create(CreateMedicalRecordDto dto)
@@ -78,8 +128,13 @@ public class MedicalRecordsController : ControllerBase
         var result = await _service.CreateAsync(dto);
 
         if (!result.Success)
-            return BadRequest(new { message = result.Message });
+        {
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { message = result.Message });
 
-        return Ok(new { message = result.Message });
+            return BadRequest(new { message = result.Message });
+        }
+
+        return StatusCode(StatusCodes.Status201Created, new { message = result.Message });
     }
 }
