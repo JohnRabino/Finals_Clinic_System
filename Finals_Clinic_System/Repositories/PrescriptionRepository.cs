@@ -1,4 +1,4 @@
-﻿
+﻿\
 using Finals_Clinic_System.Data;
 using Finals_Clinic_System.Models;
 using Finals_Clinic_System.Repositories.Interfaces;
@@ -49,6 +49,11 @@ public class PrescriptionRepository : IPrescriptionRepository
     public async Task AddAsync(Prescription prescription)
     {
         await _context.Prescriptions.AddAsync(prescription);
+    }
+
+    public void Delete(Prescription prescription)
+    {
+        _context.Prescriptions.Remove(prescription);
     }
 
     public async Task SaveAsync()
