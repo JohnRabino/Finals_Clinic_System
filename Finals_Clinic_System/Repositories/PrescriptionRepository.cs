@@ -1,4 +1,4 @@
-﻿\
+﻿
 using Finals_Clinic_System.Data;
 using Finals_Clinic_System.Models;
 using Finals_Clinic_System.Repositories.Interfaces;
