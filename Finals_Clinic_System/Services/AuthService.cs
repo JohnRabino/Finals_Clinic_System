@@ -105,6 +105,12 @@ public class AuthService : IAuthService
         if (verification == PasswordVerificationResult.Failed)
             return (false, "Invalid email or password.", null);
 
+        if (verification == PasswordVerificationResult.SuccessRehashNeeded)
+        {
+            user.PasswordHash = _hasher.HashPassword(user, dto.Password);
+            await _db.SaveChangesAsync();
+        }
+
         return (true, "Login successful.", BuildResponse(user));
     }
 
