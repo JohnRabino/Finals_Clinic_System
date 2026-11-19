@@ -1,0 +1,251 @@
+﻿
+.workspace-content {
+    max-width: 1500px;
+}
+
+.workspace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.workspace-card, .workspace-panel {
+    background: #fff;
+    border: 1px solid #e5eaf0;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 5px 18px rgba(20,42,70,.04);
+}
+
+    .workspace-card h3, .workspace-panel h2 {
+        margin: 0 0 8px;
+        color: #172b4d;
+    }
+
+    .workspace-card p, .workspace-panel .muted {
+        color: #68778c;
+        margin: 0;
+    }
+
+.workspace-panel {
+    margin-bottom: 20px;
+}
+
+    .workspace-panel h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+.workspace-form {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 13px;
+}
+
+    .workspace-form .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .workspace-form .field.full {
+            grid-column: 1/-1;
+        }
+
+    .workspace-form label {
+        color: #34445b;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .workspace-form input, .workspace-form select, .workspace-form textarea, .workspace-toolbar input, .workspace-toolbar select {
+        width: 100%;
+        border: 1px solid #d7dfe8;
+        border-radius: 8px;
+        padding: 11px 12px;
+        font: inherit;
+        color: #1c2e45;
+        background: #fff;
+    }
+
+    .workspace-form textarea {
+        min-height: 82px;
+        resize: vertical;
+    }
+
+    .workspace-form button, .workspace-toolbar button, .table-action {
+        border: 0;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .workspace-form button, .workspace-toolbar button {
+        background: #0f766e;
+        color: #fff;
+    }
+
+        .workspace-form button:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+.workspace-table-wrap {
+    overflow-x: auto;
+}
+
+.workspace-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 680px;
+    font-size: 13px;
+}
+
+    .workspace-table th, .workspace-table td {
+        padding: 12px 13px;
+        border-bottom: 1px solid #edf0f4;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .workspace-table th {
+        color: #637187;
+        background: #f7f9fb;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .workspace-table td {
+        color: #26374d;
+    }
+
+    .workspace-table tr:hover td {
+        background: #fbfcfd;
+    }
+
+.table-action {
+    margin: 2px 4px 2px 0;
+    padding: 7px 10px;
+    background: #e8f1f4;
+    color: #155e63;
+    font-size: 12px;
+}
+
+    .table-action.danger {
+        background: #fff0f0;
+        color: #b42318;
+    }
+
+    .table-action.neutral {
+        background: #eef2f7;
+        color: #334155;
+    }
+
+.workspace-toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+    .workspace-toolbar > * {
+        max-width: 260px;
+    }
+
+.workspace-empty {
+    padding: 22px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    color: #64748b;
+    background: #fafcff;
+    text-align: center;
+}
+
+.workspace-feedback {
+    margin-bottom: 15px;
+}
+
+.detail-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(190px,1fr));
+    gap: 12px;
+}
+
+.detail-item {
+    background: #f7f9fb;
+    border-radius: 9px;
+    padding: 12px;
+}
+
+    .detail-item span {
+        display: block;
+        font-size: 11px;
+        color: #6b7a90;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .detail-item strong {
+        color: #1c2e45;
+        overflow-wrap: anywhere;
+    }
+
+.status-pill {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 4px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #e8eef5;
+    color: #34445b;
+}
+
+    .status-pill.active, .status-pill.completed {
+        background: #e7f7ee;
+        color: #137547;
+    }
+
+    .status-pill.booked {
+        background: #fff4df;
+        color: #9a5b00;
+    }
+
+    .status-pill.cancelled, .status-pill.inactive {
+        background: #ffeded;
+        color: #b42318;
+    }
+
+    .status-pill.confirmed {
+        background: #e7efff;
+        color: #2457a7;
+    }
+
+.report-pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: #f7f9fb;
+    padding: 16px;
+    border-radius: 10px;
+    color: #26374d;
+    font-size: 12px;
+    max-height: 600px;
+    overflow: auto;
+}
+
+@media(max-width:700px) {
+    .workspace-form {
+        grid-template-columns: 1fr;
+    }
+
+        .workspace-form .field.full {
+            grid-column: auto;
+        }
+
+    .workspace-panel {
+        padding: 15px;
+    }
+}
