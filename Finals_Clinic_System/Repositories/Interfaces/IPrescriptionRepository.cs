@@ -10,5 +10,6 @@ public interface IPrescriptionRepository
     Task<List<Prescription>> GetByConsultationIdAsync(int consultationId);
     Task<Prescription?> GetByIdAsync(int id);
     Task AddAsync(Prescription prescription);
+    void Delete(Prescription prescription);
     Task SaveAsync();
 }
