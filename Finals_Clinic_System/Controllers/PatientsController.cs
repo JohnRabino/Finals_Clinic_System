@@ -84,7 +84,7 @@ public class PatientsController : ControllerBase
         if (!result.Success)
             return BadRequest(new { message = result.Message });
 
-        return Ok(new
+        return StatusCode(StatusCodes.Status201Created, new
         {
             message = result.Message,
             data = result.Data == null ? null : new
@@ -106,7 +106,11 @@ public class PatientsController : ControllerBase
         var result = await _service.UpdateAsync(id, dto);
 
         if (!result.Success)
+        {
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { message = result.Message });
             return BadRequest(new { message = result.Message });
+        }
 
         return Ok(new
         {
