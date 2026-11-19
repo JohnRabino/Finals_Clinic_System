@@ -46,7 +46,7 @@ public class ReferralRepository : IReferralRepository
     public Task<bool> PatientExistsAsync(int patientId)
     {
         return _context.Patients
-            .AnyAsync(p => p.PatientId == patientId);
+            .AnyAsync(p => p.PatientId == patientId && p.IsActive);
     }
 
     public Task<bool> ExternalDoctorExistsAsync(int externalDoctorId)
