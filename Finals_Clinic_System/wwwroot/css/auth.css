@@ -1,0 +1,255 @@
+﻿
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    background: #ffffff;
+    color: #1e293b;
+    overflow-x: hidden;
+}
+
+.auth-container {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: #ffffff;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.brand-section {
+    position: relative;
+    min-width: 0;
+    min-height: 100vh;
+    background: #102b4e;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 70px clamp(40px, 6vw, 105px) 110px;
+}
+
+.brand-content {
+    width: 100%;
+    max-width: 540px;
+}
+
+.brand-label {
+    color: #d5b66b;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 2.5px;
+    margin-bottom: 22px;
+}
+
+.brand-content h1 {
+    font-size: clamp(38px, 4.2vw, 60px);
+    font-weight: 700;
+    letter-spacing: 3px;
+    line-height: 1.15;
+    margin-bottom: 25px;
+}
+
+.brand-description {
+    max-width: 450px;
+    color: #d4dfec;
+    font-size: 17px;
+    line-height: 1.8;
+}
+
+.brand-footer {
+    position: absolute;
+    bottom: 38px;
+    left: clamp(40px, 6vw, 105px);
+    color: #aabbd0;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.form-section {
+    min-width: 0;
+    min-height: 100vh;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px clamp(45px, 7vw, 120px);
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 465px;
+}
+
+.form-heading {
+    margin-bottom: 38px;
+}
+
+    .form-heading h2 {
+        color: #102b4e;
+        font-size: 34px;
+        font-weight: 700;
+        line-height: 1.25;
+        margin-bottom: 12px;
+    }
+
+    .form-heading p {
+        color: #7b8798;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+.form-tabs {
+    display: flex;
+    gap: 30px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 32px;
+}
+
+.tab {
+    border: none;
+    background: transparent;
+    padding: 13px 5px;
+    color: #8994a4;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+    .tab.active {
+        color: #174b80;
+        font-weight: bold;
+        border-bottom: 3px solid #174b80;
+    }
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: bold;
+        color: #34445a;
+        margin-bottom: 10px;
+    }
+
+    .form-group input {
+        width: 100%;
+        height: 52px;
+        padding: 0 15px;
+        border: 1px solid #d8e0e9;
+        border-radius: 7px;
+        outline: none;
+        font-size: 14px;
+        color: #1e293b;
+        background: #fbfcfe;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        .form-group input:focus {
+            border-color: #285b8e;
+            box-shadow: 0 0 0 3px rgba(40, 91, 142, 0.10);
+        }
+
+.submit-button {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: 7px;
+    background: #174b80;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s;
+}
+
+    .submit-button:hover {
+        background: #103a66;
+    }
+
+    .submit-button:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+.message {
+    margin-top: 18px;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+    .message.error {
+        color: #c0392b;
+    }
+
+    .message.success {
+        color: #218653;
+    }
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 700px) {
+    .auth-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .brand-section {
+        min-height: 310px;
+        padding: 50px 30px 75px;
+    }
+
+    .brand-content {
+        max-width: 100%;
+    }
+
+        .brand-content h1 {
+            font-size: 39px;
+        }
+
+    .brand-description {
+        font-size: 15px;
+    }
+
+    .brand-footer {
+        left: 30px;
+        bottom: 22px;
+    }
+
+    .form-section {
+        min-height: 550px;
+        padding: 50px 30px;
+    }
+
+    .form-wrapper {
+        max-width: 100%;
+    }
+
+    .form-heading h2 {
+        font-size: 29px;
+    }
+}
