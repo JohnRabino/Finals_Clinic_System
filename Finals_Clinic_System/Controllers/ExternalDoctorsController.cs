@@ -66,11 +66,15 @@ public class ExternalDoctorsController : ControllerBase
         var result = await _service.CreateAsync(dto);
 
         if (!result.Success)
+        {
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { message = result.Message });
             return BadRequest(new { message = result.Message });
+        }
 
         var doctor = result.Data!;
 
-        return Ok(new
+        return StatusCode(StatusCodes.Status201Created, new
         {
             message = result.Message,
             data = new
@@ -93,7 +97,11 @@ public class ExternalDoctorsController : ControllerBase
         var result = await _service.UpdateAsync(id, dto);
 
         if (!result.Success)
+        {
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { message = result.Message });
             return BadRequest(new { message = result.Message });
+        }
 
         var doctor = result.Data!;
 
