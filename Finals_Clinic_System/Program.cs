@@ -70,6 +70,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(jwtKey)),
             RoleClaimType = ClaimTypes.Role
         };
+
         options.Events = new JwtBearerEvents
         {
             OnTokenValidated = async context =>
@@ -135,7 +136,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
