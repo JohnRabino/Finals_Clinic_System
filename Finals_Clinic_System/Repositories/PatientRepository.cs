@@ -23,6 +23,7 @@ public class PatientRepository : IPatientRepository
 
     public Task<Patient?> GetByIdAsync(int id) =>
         _context.Patients
+            .Include(p => p.User)
             .FirstOrDefaultAsync(p => p.PatientId == id);
 
     public Task<Patient?> GetByUserIdAsync(int userId) =>
