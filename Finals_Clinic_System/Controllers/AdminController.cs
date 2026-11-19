@@ -1,5 +1,4 @@
-﻿
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Finals_Clinic_System.DTOs.Admin;
 using Finals_Clinic_System.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -25,15 +24,29 @@ public class AdminController : ControllerBase
         return Ok(await _service.GetAllAsync());
     }
 
+    [HttpGet("users/{id:int}")]
+    public async Task<IActionResult> GetUserById(int id)
+    {
+        var user = await _service.GetByIdAsync(id);
+        if (user == null)
+            return NotFound(new { message = "User account not found." });
+
+        return Ok(user);
+    }
+
     [HttpPost("users")]
     public async Task<IActionResult> CreateStaff(CreateStaffAccountDto dto)
     {
         var result = await _service.CreateAsync(dto);
-
         if (!result.Success)
-            return BadRequest(new { message = result.Message });
+        {
+            if (result.Message.Contains("already registered", StringComparison.OrdinalIgnoreCase))
+                return Conflict(new { message = result.Message });
 
-        return Ok(new
+            return BadRequest(new { message = result.Message });
+        }
+
+        return StatusCode(StatusCodes.Status201Created, new
         {
             message = result.Message,
             data = result.Data
@@ -41,20 +54,23 @@ public class AdminController : ControllerBase
     }
 
     [HttpPut("users/{id:int}/status")]
-    public async Task<IActionResult> SetUserStatus(
-        int id,
-        [FromQuery] bool isActive)
+    public async Task<IActionResult> SetUserStatus(int id, [FromQuery] bool? isActive)
     {
-        var value = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!isActive.HasValue)
+            return BadRequest(new { message = "The isActive query parameter is required." });
 
+        var value = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(value, out var adminId))
             return Unauthorized();
 
-        var result = await _service.SetActiveAsync(
-            id, isActive, adminId);
-
+        var result = await _service.SetActiveAsync(id, isActive.Value, adminId);
         if (!result.Success)
-            return BadRequest(new { message = result.Message });
+        {
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { message = result.Message });
+
+            return Conflict(new { message = result.Message });
+        }
 
         return Ok(new { message = result.Message });
     }
