@@ -1,17 +1,23 @@
-﻿
+﻿using System.Data;
+using Finals_Clinic_System.Data;
 using Finals_Clinic_System.DTOs;
 using Finals_Clinic_System.Models;
 using Finals_Clinic_System.Repositories.Interfaces;
 using Finals_Clinic_System.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Finals_Clinic_System.Services;
 
 public class ClinicTimeSlotService : IClinicTimeSlotService
 {
+    private readonly ClinicDbContext _db;
     private readonly IClinicTimeSlotRepository _repository;
 
-    public ClinicTimeSlotService(IClinicTimeSlotRepository repository)
+    public ClinicTimeSlotService(
+        ClinicDbContext db,
+        IClinicTimeSlotRepository repository)
     {
+        _db = db;
         _repository = repository;
     }
 
@@ -20,11 +26,23 @@ public class ClinicTimeSlotService : IClinicTimeSlotService
         return _repository.GetAvailableAsync(date);
     }
 
-    public async Task<(bool Success, string Message)> CreateAsync(
-        CreateClinicTimeSlotDto dto)
+    public Task<List<ClinicTimeSlot>> GetAllAsync()
+    {
+        return _repository.GetAllAsync();
+    }
+
+    public Task<ClinicTimeSlot?> GetByIdAsync(int id)
+    {
+        return _repository.GetByIdAsync(id);
+    }
+
+    public async Task<(bool Success, string Message)> CreateAsync(CreateClinicTimeSlotDto dto)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
         var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+
+        if (dto.SlotDate == DateOnly.MinValue)
+            return (false, "A valid slot date is required.");
 
         if (dto.SlotDate < today)
             return (false, "Cannot create a time slot for a past date.");
@@ -34,6 +52,8 @@ public class ClinicTimeSlotService : IClinicTimeSlotService
 
         if (dto.EndTime <= dto.StartTime)
             return (false, "End time must be later than start time.");
+
+        await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
         var hasOverlap = await _repository.HasOverlapAsync(
             dto.SlotDate,
@@ -53,6 +73,7 @@ public class ClinicTimeSlotService : IClinicTimeSlotService
 
         await _repository.AddAsync(timeSlot);
         await _repository.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return (true, "Clinic time slot created successfully.");
     }
