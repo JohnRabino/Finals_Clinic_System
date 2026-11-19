@@ -51,6 +51,11 @@ public class MedicalRecordRepository : IMedicalRecordRepository
         await _context.MedicalRecords.AddAsync(record);
     }
 
+    public void Delete(MedicalRecord record)
+    {
+        _context.MedicalRecords.Remove(record);
+    }
+
     public Task SaveChangesAsync()
     {
         return _context.SaveChangesAsync();
