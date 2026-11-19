@@ -76,7 +76,7 @@ public class ManualClinicLogsController : ControllerBase
                 message = "Invalid patient or manual clinic log details."
             });
 
-        return Ok(new
+        return StatusCode(StatusCodes.Status201Created, new
         {
             message = "Manual clinic log created successfully.",
             data = new
