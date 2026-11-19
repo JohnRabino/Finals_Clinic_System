@@ -43,6 +43,22 @@ public class AdminUserRepository : IAdminUserRepository
         await Task.CompletedTask;
     }
 
+    public async Task SetLinkedProfileActiveAsync(int userId, string role, bool isActive)
+    {
+        if (role == "Student")
+        {
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient != null)
+                patient.IsActive = isActive;
+        }
+        else if (role == "Doctor")
+        {
+            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+            if (doctor != null)
+                doctor.IsActive = isActive;
+        }
+    }
+
     public Task SaveChangesAsync() =>
         _context.SaveChangesAsync();
 }
