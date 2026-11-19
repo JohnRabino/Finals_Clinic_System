@@ -100,6 +100,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IExternalDoctorRepository, ExternalDoctorRepository>();
 builder.Services.AddScoped<IClinicTimeSlotRepository, ClinicTimeSlotRepository>();
@@ -136,6 +144,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

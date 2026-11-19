@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campus Clinic System — Sign In</title>
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="auth-body">
+    <main class="auth-container">
+        <div class="auth-header">
+            <h1>Campus Clinic System</h1>
+            <p>Appointment, Consultation & Medical Records Portal</p>
+        </div>
+
+        <div class="tabs">
+            <button id="tab-login" class="tab-btn active" type="button">Log In</button>
+            <button id="tab-register" class="tab-btn" type="button">Student Register</button>
+        </div>
+
+        <div id="auth-alert" class="alert hidden"></div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="card-form">
+            <div class="form-group">
+                <label for="login-email">Email Address</label>
+                <input id="login-email" type="email" required placeholder="student@school.edu" />
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input id="login-password" type="password" required placeholder="••••••••" />
+            </div>
+            <button type="submit" class="btn btn-primary full-width">Log In</button>
+        </form>
+
+        <!-- Student Registration Form -->
+        <form id="register-form" class="card-form hidden">
+            <div class="form-group">
+                <label for="reg-name">Full Name</label>
+                <input id="reg-name" type="text" required placeholder="Juan Dela Cruz" />
+            </div>
+            <div class="form-group">
+                <label for="reg-student-num">Student Number</label>
+                <input id="reg-student-num" type="text" required placeholder="2023-00123" />
+            </div>
+            <div class="form-group">
+                <label for="reg-email">Email Address</label>
+                <input id="reg-email" type="email" required placeholder="juan@school.edu" />
+            </div>
+            <div class="form-group">
+                <label for="reg-password">Password (min 8 characters)</label>
+                <input id="reg-password" type="password" minlength="8" required placeholder="••••••••" />
+            </div>
+            <button type="submit" class="btn btn-primary full-width">Create Student Account</button>
+        </form>
+    </main>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>
