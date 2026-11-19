@@ -43,6 +43,29 @@ public class PrescriptionsController : ControllerBase
         }));
     }
 
+    [HttpGet("{id:int}")]
+    [Authorize(Roles = "Nurse")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var prescription = await _prescriptionService.GetByIdAsync(id);
+
+        if (prescription == null)
+            return NotFound(new { message = "Prescription not found." });
+
+        return Ok(new
+        {
+            prescription.PrescriptionId,
+            prescription.PatientId,
+            PatientName = prescription.Patient?.FullName,
+            prescription.ConsultationId,
+            prescription.MedicineName,
+            prescription.Dosage,
+            prescription.Instructions,
+            prescription.PrescribingDoctorName,
+            prescription.PrescriptionDate
+        });
+    }
+
     [HttpGet("patient/{patientId}")]
     [Authorize(Roles = "Nurse")]
     public async Task<IActionResult> GetByPatientId(int patientId)
@@ -86,6 +109,41 @@ public class PrescriptionsController : ControllerBase
         }));
     }
 
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Nurse")]
+    public async Task<IActionResult> Update(int id, UpdatePrescriptionDto dto)
+    {
+        var prescription = await _prescriptionService.UpdateAsync(id, dto);
+        if (prescription == null)
+            return NotFound(new { message = "Prescription not found or update details are invalid." });
+
+        return Ok(new
+        {
+            message = "Prescription updated successfully.",
+            data = new
+            {
+                prescription.PrescriptionId,
+                prescription.PatientId,
+                prescription.ConsultationId,
+                prescription.MedicineName,
+                prescription.Dosage,
+                prescription.Instructions,
+                prescription.PrescribingDoctorName,
+                prescription.PrescriptionDate
+            }
+        });
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Nurse")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        if (!await _prescriptionService.DeleteAsync(id))
+            return NotFound(new { message = "Prescription not found." });
+
+        return Ok(new { message = "Prescription deleted. Use this only to correct an erroneous entry." });
+    }
+
     [HttpPost]
     [Authorize(Roles = "Nurse,Doctor")]
     public async Task<IActionResult> Create(CreatePrescriptionDto dto)
@@ -108,7 +166,7 @@ public class PrescriptionsController : ControllerBase
             });
         }
 
-        return Ok(new
+        return StatusCode(StatusCodes.Status201Created, new
         {
             message = "Prescription created successfully.",
             data = new
