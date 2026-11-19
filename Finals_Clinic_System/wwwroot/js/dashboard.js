@@ -1,75 +1,67 @@
-﻿
-const user = AngelicareApp.getUser();
+﻿const user = AngelicareApp.getUser();
 const role = AngelicareApp.getRole();
-
 const welcomeTitle = document.getElementById("welcomeTitle");
 const welcomeDescription = document.getElementById("welcomeDescription");
 const quickAccess = document.getElementById("quickAccess");
 
 const roleContent = {
     student: {
-        title: "Welcome, Student!",
-        description: "View your clinic appointments and access your personal clinic information.",
+        description: "Book clinic visits and review your own clinic information.",
         modules: [
-            {
-                title: "My Appointments",
-                description: "View your scheduled appointments and book an available clinic time slot.",
-                url: "/appointments.html"
-            }
+            ["My Appointments", "Book, review, or cancel eligible appointments.", "/appointments.html"],
+            ["My Profile", "View your student clinic profile.", "/workspace.html?module=profile"],
+            ["Consultations", "Review your consultation history.", "/workspace.html?module=consultations"],
+            ["Medical Records", "View diagnoses and treatments recorded by the clinic.", "/workspace.html?module=records"],
+            ["Prescriptions", "View your medicine instructions.", "/workspace.html?module=prescriptions"],
+            ["Referrals", "Track your external specialist referrals.", "/workspace.html?module=referrals"]
         ]
     },
     nurse: {
-        title: "Welcome, Nurse!",
-        description: "Manage clinic appointments and assist with daily clinic operations.",
+        description: "Manage patients, appointments, consultations, clinic records, and daily operations.",
         modules: [
-            {
-                title: "Appointments",
-                description: "Review appointments, confirm bookings, and update appointment status.",
-                url: "/appointments.html"
-            }
+            ["Appointments", "Review bookings and update appointment statuses.", "/appointments.html"],
+            ["Patients", "Create, update, and deactivate patient profiles.", "/workspace.html?module=patients"],
+            ["Consultations", "Record visits, assign doctors, and complete consultations.", "/workspace.html?module=consultations"],
+            ["Medical Records", "Maintain diagnosis and treatment records.", "/workspace.html?module=records"],
+            ["Prescriptions", "View and maintain prescriptions.", "/workspace.html?module=prescriptions"],
+            ["Referrals", "Create referrals and record returned findings.", "/workspace.html?module=referrals"],
+            ["Clinic Operations", "Manage time slots, external doctors, and walk-in logs.", "/workspace.html?module=operations"],
+            ["Reports", "View patient history and daily schedules.", "/workspace.html?module=reports"]
         ]
     },
     doctor: {
-        title: "Welcome, Doctor!",
-        description: "Access your clinic workspace for assigned consultations and clinical assessments.",
-        modules: []
+        description: "Review consultations assigned to you, submit assessments, and issue prescriptions.",
+        modules: [
+            ["My Profile", "View your doctor profile.", "/workspace.html?module=profile"],
+            ["Assigned Consultations", "Review assigned cases and submit your assessment.", "/workspace.html?module=consultations"],
+            ["Prescriptions", "Issue prescriptions for eligible consultations.", "/workspace.html?module=prescriptions"]
+        ]
     },
     admin: {
-        title: "Welcome, Administrator!",
-        description: "Manage clinic system accounts and monitor system operations.",
-        modules: []
+        description: "Manage staff accounts, doctor profiles, and clinic reports.",
+        modules: [
+            ["Staff Accounts", "Create Nurse and Doctor accounts and manage account status.", "/workspace.html?module=admin"],
+            ["Doctors", "Update active doctor profile details.", "/workspace.html?module=doctors"],
+            ["Reports", "View patient history and daily schedules.", "/workspace.html?module=reports"]
+        ]
     }
 };
 
 const content = roleContent[role];
-
 if (!content) {
     AngelicareApp.logout();
 } else {
     welcomeTitle.textContent = `Welcome, ${user.fullName || "User"}!`;
     welcomeDescription.textContent = content.description;
-
-    if (content.modules.length === 0) {
-        const message = document.createElement("div");
-        message.className = "content-card";
-        message.textContent = "Additional modules for this role will be added in the next development batch.";
-        quickAccess.appendChild(message);
-    } else {
-        content.modules.forEach(module => {
-            const link = document.createElement("a");
-            link.href = module.url;
-            link.className = "access-card";
-
-            const title = document.createElement("h3");
-            title.textContent = module.title;
-
-            const description = document.createElement("p");
-            description.textContent = module.description;
-
-            link.appendChild(title);
-            link.appendChild(description);
-
-            quickAccess.appendChild(link);
-        });
-    }
+    content.modules.forEach(module => {
+        const link = document.createElement("a");
+        link.href = module[2];
+        link.className = "access-card";
+        const title = document.createElement("h3");
+        title.textContent = module[0];
+        const description = document.createElement("p");
+        description.textContent = module[1];
+        link.append(title, description);
+        quickAccess.appendChild(link);
+    });
 }
