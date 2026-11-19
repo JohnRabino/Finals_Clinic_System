@@ -1,5 +1,4 @@
-﻿
-using Finals_Clinic_System.Data;
+﻿using Finals_Clinic_System.Data;
 using Finals_Clinic_System.Models;
 using Finals_Clinic_System.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -17,27 +16,40 @@ public class ClinicTimeSlotRepository : IClinicTimeSlotRepository
 
     public Task<List<ClinicTimeSlot>> GetAvailableAsync(DateOnly? date)
     {
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+
         var query = _context.ClinicTimeSlots
             .AsNoTracking()
-            .Where(s => s.IsAvailable);
+            .Where(s => s.IsAvailable &&
+                (s.SlotDate > today ||
+                 (s.SlotDate == today && s.StartTime > currentTime)));
 
         if (date.HasValue)
             query = query.Where(s => s.SlotDate == date.Value);
 
-        return query
+        return query.OrderBy(s => s.SlotDate)
+            .ThenBy(s => s.StartTime)
+            .ToListAsync();
+    }
+
+    public Task<List<ClinicTimeSlot>> GetAllAsync()
+    {
+        return _context.ClinicTimeSlots
+            .AsNoTracking()
+            .Include(s => s.Appointments)
             .OrderBy(s => s.SlotDate)
             .ThenBy(s => s.StartTime)
             .ToListAsync();
     }
 
-    public Task<ClinicTimeSlot?> GetByIdAsync(int id) =>
-        _context.ClinicTimeSlots
+    public Task<ClinicTimeSlot?> GetByIdAsync(int id)
+    {
+        return _context.ClinicTimeSlots
             .FirstOrDefaultAsync(s => s.TimeSlotId == id);
+    }
 
-    public Task<bool> HasOverlapAsync(
-        DateOnly date,
-        TimeOnly startTime,
-        TimeOnly endTime)
+    public Task<bool> HasOverlapAsync(DateOnly date, TimeOnly startTime, TimeOnly endTime)
     {
         return _context.ClinicTimeSlots.AnyAsync(s =>
             s.SlotDate == date &&
@@ -45,9 +57,21 @@ public class ClinicTimeSlotRepository : IClinicTimeSlotRepository
             s.EndTime > startTime);
     }
 
-    public async Task AddAsync(ClinicTimeSlot timeSlot) =>
-        await _context.ClinicTimeSlots.AddAsync(timeSlot);
+    public Task<int> TryReserveAsync(int timeSlotId)
+    {
+        return _context.ClinicTimeSlots
+            .Where(s => s.TimeSlotId == timeSlotId && s.IsAvailable)
+            .ExecuteUpdateAsync(update => update
+                .SetProperty(s => s.IsAvailable, false));
+    }
 
-    public Task SaveChangesAsync() =>
-        _context.SaveChangesAsync();
+    public Task AddAsync(ClinicTimeSlot timeSlot)
+    {
+        return _context.ClinicTimeSlots.AddAsync(timeSlot).AsTask();
+    }
+
+    public Task SaveChangesAsync()
+    {
+        return _context.SaveChangesAsync();
+    }
 }
