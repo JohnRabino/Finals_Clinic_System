@@ -14,34 +14,42 @@ public class AppointmentRepository : IAppointmentRepository
         _context = context;
     }
 
-    public Task<List<Appointment>> GetAllAsync() =>
-        _context.Appointments
+    public Task<List<Appointment>> GetAllAsync()
+    {
+        return _context.Appointments
             .AsNoTracking()
             .Include(a => a.Patient)
             .Include(a => a.TimeSlot)
             .Include(a => a.Doctor)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
+    }
 
-    public Task<List<Appointment>> GetByPatientIdAsync(int patientId) =>
-        _context.Appointments
+    public Task<List<Appointment>> GetByPatientIdAsync(int patientId)
+    {
+        return _context.Appointments
             .AsNoTracking()
             .Include(a => a.TimeSlot)
             .Include(a => a.Doctor)
             .Where(a => a.PatientId == patientId)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
+    }
 
-    public Task<Appointment?> GetByIdAsync(int id) =>
-        _context.Appointments
+    public Task<Appointment?> GetByIdAsync(int id)
+    {
+        return _context.Appointments
+            .Include(a => a.Patient)
+            .Include(a => a.Doctor)
             .Include(a => a.TimeSlot)
             .FirstOrDefaultAsync(a => a.AppointmentId == id);
+    }
 
     public Task<bool> HasDoctorConflictAsync(
-    int doctorId,
-    DateOnly slotDate,
-    TimeOnly startTime,
-    TimeOnly endTime)
+        int doctorId,
+        DateOnly slotDate,
+        TimeOnly startTime,
+        TimeOnly endTime)
     {
         return _context.Appointments.AnyAsync(a =>
             a.DoctorId == doctorId &&
@@ -51,18 +59,22 @@ public class AppointmentRepository : IAppointmentRepository
             a.TimeSlot.EndTime > startTime);
     }
 
-    public async Task AddAsync(Appointment appointment) =>
-        await _context.Appointments.AddAsync(appointment);
+    public Task AddAsync(Appointment appointment)
+    {
+        return _context.Appointments.AddAsync(appointment).AsTask();
+    }
 
-    public Task SaveChangesAsync() =>
-        _context.SaveChangesAsync();
+    public Task SaveChangesAsync()
+    {
+        return _context.SaveChangesAsync();
+    }
 
     public Task<bool> PatientExistsAndActiveAsync(int patientId)
     {
         return _context.Patients.AnyAsync(p =>
             p.PatientId == patientId &&
             p.IsActive &&
-            (p.UserId == null || p.User!.IsActive));
+            (p.UserId == null || (p.User != null && p.User.IsActive)));
     }
 
     public Task<bool> DoctorExistsAndActiveAsync(int doctorId)
