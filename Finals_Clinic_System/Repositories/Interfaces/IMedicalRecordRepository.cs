@@ -9,5 +9,6 @@ public interface IMedicalRecordRepository
     Task<List<MedicalRecord>> GetByPatientIdAsync(int patientId);
     Task<MedicalRecord?> GetByIdAsync(int id);
     Task AddAsync(MedicalRecord record);
+    void Delete(MedicalRecord record);
     Task SaveChangesAsync();
 }
