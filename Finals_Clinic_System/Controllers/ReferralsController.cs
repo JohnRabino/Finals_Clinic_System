@@ -49,6 +49,35 @@ public class ReferralsController : ControllerBase
         }));
     }
 
+    [HttpGet("{id:int}")]
+    [Authorize(Roles = "Nurse")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var referral = await _referralService.GetByIdAsync(id);
+
+        if (referral == null)
+            return NotFound(new { message = "Referral not found." });
+
+        return Ok(new
+        {
+            referral.ReferralId,
+            referral.PatientId,
+            PatientName = referral.Patient?.FullName,
+            referral.ExternalDoctorId,
+            ExternalDoctorName = referral.ExternalDoctor?.FullName,
+            ExternalDoctorSpecialization = referral.ExternalDoctor?.Specialization,
+            referral.Reason,
+            referral.Notes,
+            referral.Status,
+            referral.ReturnedFindings,
+            referral.Diagnosis,
+            referral.Treatment,
+            referral.ReturnedPrescription,
+            referral.ReferralDate,
+            referral.ResponseDate
+        });
+    }
+
     [HttpGet("patient/{patientId}")]
     [Authorize(Roles = "Nurse")]
     public async Task<IActionResult> GetByPatientId(int patientId)
@@ -117,7 +146,7 @@ public class ReferralsController : ControllerBase
                 message = "Invalid patient, inactive external doctor, or referral details."
             });
 
-        return Ok(new
+        return StatusCode(StatusCodes.Status201Created, new
         {
             message = "Referral created successfully.",
             data = new
@@ -140,13 +169,23 @@ public class ReferralsController : ControllerBase
         int id,
         UpdateReferralResponseDto dto)
     {
+        var existing = await _referralService.GetByIdAsync(id);
+
+        if (existing == null)
+            return NotFound(new { message = "Referral not found." });
+
+        if (existing.Status == "Completed")
+            return Conflict(new { message = "This referral has already been completed." });
+
+        if (string.IsNullOrWhiteSpace(dto.ReturnedFindings) ||
+            string.IsNullOrWhiteSpace(dto.Diagnosis) ||
+            string.IsNullOrWhiteSpace(dto.Treatment))
+            return BadRequest(new { message = "Findings, diagnosis, and treatment are required." });
+
         var referral = await _referralService.UpdateResponseAsync(id, dto);
 
         if (referral == null)
-            return BadRequest(new
-            {
-                message = "Referral not found, already completed, or response details are incomplete."
-            });
+            return Conflict(new { message = "The referral response could not be recorded." });
 
         return Ok(new
         {
