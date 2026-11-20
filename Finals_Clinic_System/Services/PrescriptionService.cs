@@ -29,6 +29,9 @@ public class PrescriptionService : IPrescriptionService
     public Task<List<Prescription>> GetByPatientIdAsync(int patientId) =>
         _prescriptionRepository.GetByPatientIdAsync(patientId);
 
+    public Task<List<Prescription>> GetByDoctorUserIdAsync(int userId) =>
+        _prescriptionRepository.GetByDoctorUserIdAsync(userId);
+
     public Task<Prescription?> GetByIdAsync(int id) => _prescriptionRepository.GetByIdAsync(id);
 
     public async Task<Prescription?> CreateAsync(CreatePrescriptionDto dto, int? doctorUserId)
