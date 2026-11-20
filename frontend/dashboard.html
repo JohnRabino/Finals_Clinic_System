@@ -1,489 +1,704 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Campus Clinic System — Dashboard</title>
-    <link rel="stylesheet" href="css/styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClinicCare — Workspace</title>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-    <header class="topbar">
-        <div class="brand">
-            <strong>Campus Clinic System</strong>
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="crest-sm">CC</div>
+      <div>
+        <strong class="topbar-title">ClinicCare</strong>
+        <span class="topbar-sub">Academic Health &amp; Records Portal</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-pill">
+        <span id="user-name">User</span>
+        <span id="user-role" class="badge role-badge">Role</span>
+      </div>
+      <button id="refresh-btn" class="btn btn-outline-light btn-sm" type="button">↻ Refresh</button>
+      <button id="logout-btn" class="btn btn-gold btn-sm" type="button">Log Out</button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-section-label">NAVIGATION MENU</div>
+      <nav id="role-nav" class="sidebar-nav"></nav>
+    </aside>
+
+    <main class="main-area">
+      <div class="page-header">
+        <div>
+          <h1 id="page-title">Dashboard</h1>
+          <p id="page-subtitle" class="muted">Role-secured school clinic operations</p>
         </div>
-        <nav id="role-nav" class="nav-links"></nav>
-        <div class="user-meta">
-            <span id="user-name">Loading...</span>
-            <span id="user-role" class="badge role-badge">Role</span>
-            <button id="logout-btn" class="btn btn-outline btn-sm" type="button">Log Out</button>
+      </div>
+
+      <div id="global-alert" class="alert hidden"></div>
+      <div id="toast-container" class="toast-container"></div>
+      <section id="kpi-strip" class="kpi-grid"></section>
+
+      <!-- ==================== STUDENT VIEWS ==================== -->
+      <section id="view-student-appointments" class="view-section hidden">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h2>1. Select Available Clinic Time Slot</h2>
+              <div class="inline-actions">
+                <input id="slot-date-filter" type="date" title="Filter slots by date" />
+                <button id="clear-slot-filter" type="button" class="btn btn-outline btn-sm">All Dates</button>
+              </div>
+            </div>
+            <div id="slot-cards-grid" class="slot-grid"></div>
+
+            <form id="book-appointment-form" class="mt-1">
+              <input id="appointment-slot" type="hidden" required />
+              <div class="selected-slot-banner" id="selected-slot-banner">
+                Click an available time slot card above to select your schedule.
+              </div>
+              <div class="grid-2 mt-sm">
+                <div class="form-group">
+                  <label for="appointment-doctor-id">Preferred Doctor ID (Optional)</label>
+                  <input id="appointment-doctor-id" type="number" min="1" placeholder="Leave blank for any" />
+                </div>
+                <div class="form-group">
+                  <label for="appointment-reason">Reason for Visit *</label>
+                  <input id="appointment-reason" type="text" required placeholder="Fever, checkup, clearance..." />
+                </div>
+              </div>
+              <button id="book-submit-btn" type="submit" class="btn btn-primary full-width" disabled>
+                Book Selected Appointment
+              </button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>My Appointments</h2>
+              <select id="student-appt-filter" class="compact-select">
+                <option value="ALL">All Statuses</option>
+                <option value="Booked">Booked</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Schedule</th>
+                    <th>Doctor</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="student-appointments-tbody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
-    </header>
+      </section>
 
-    <main class="container">
-        <div id="global-alert" class="alert hidden"></div>
-        <div id="loading-bar" class="loading hidden">Processing request...</div>
+      <section id="view-student-history" class="view-section hidden">
+        <div class="card mb-1" id="student-profile-card">
+          <div class="card-head"><h2>My Linked Patient Profile</h2></div>
+          <div id="student-profile-box" class="profile-grid"></div>
+        </div>
 
-        <!-- ==================== STUDENT VIEWS ==================== -->
-        <section id="view-student-appointments" class="view-section hidden">
-            <div class="grid-2">
-                <div class="card">
-                    <h2>Book an Appointment</h2>
-                    <form id="book-appointment-form">
-                        <div class="form-group">
-                            <label for="slot-date-filter">Filter Slots by Date (Optional)</label>
-                            <input id="slot-date-filter" type="date" />
-                        </div>
-                        <div class="form-group">
-                            <label for="appointment-slot">Available Time Slot *</label>
-                            <select id="appointment-slot" required>
-                                <option value="">-- Select a time slot --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="appointment-doctor-id">Preferred Doctor ID (Optional)</label>
-                            <input id="appointment-doctor-id" type="number" min="1" placeholder="Leave blank if any" />
-                        </div>
-                        <div class="form-group">
-                            <label for="appointment-reason">Reason for Visit</label>
-                            <textarea id="appointment-reason" rows="2" placeholder="Fever, headache, medical clearance..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Book Appointment</button>
-                    </form>
-                </div>
+        <div class="card mb-1">
+          <h2>My Consultations &amp; Doctor Assessments</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Chief Complaint</th>
+                  <th>Nurse Assessment</th>
+                  <th>Doctor Assessment</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="student-consultations-tbody"></tbody>
+            </table>
+          </div>
+        </div>
 
-                <div class="card">
-                    <h2>My Appointments</h2>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Date & Time</th>
-                                    <th>Doctor</th>
-                                    <th>Reason</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="student-appointments-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>My Medical Records</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Diagnosis</th>
+                    <th>Treatment</th>
+                    <th>Provider</th>
+                  </tr>
+                </thead>
+                <tbody id="student-records-tbody"></tbody>
+              </table>
             </div>
-        </section>
+          </div>
 
-        <section id="view-student-history" class="view-section hidden">
-            <div class="card">
-                <h2>My Consultations & Diagnoses</h2>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Complaint</th>
-                                <th>Nurse Assessment</th>
-                                <th>Doctor Assessment</th>
-                                <th>Follow-Up</th>
-                            </tr>
-                        </thead>
-                        <tbody id="student-consultations-tbody"></tbody>
-                    </table>
-                </div>
+          <div class="card">
+            <h2>My Prescriptions &amp; Referrals</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type / Item</th>
+                    <th>Details</th>
+                    <th>Instructions / Status</th>
+                  </tr>
+                </thead>
+                <tbody id="student-rx-ref-tbody"></tbody>
+              </table>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div class="grid-2 mt-1">
-                <div class="card">
-                    <h2>My Medical Records</h2>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Diagnosis</th>
-                                    <th>Treatment</th>
-                                    <th>Doctor</th>
-                                </tr>
-                            </thead>
-                            <tbody id="student-records-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2>My Prescriptions & Referrals</h2>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Medicine / Referral</th>
-                                    <th>Dosage / Reason</th>
-                                    <th>Instructions / Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="student-rx-ref-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
+      <!-- ==================== DOCTOR VIEWS ==================== -->
+      <section id="view-doctor-consultations" class="view-section hidden">
+        <div class="card">
+          <div class="card-head">
+            <h2>Assigned Patient Consultations</h2>
+            <div class="inline-actions">
+              <input id="doctor-search" type="search" class="compact-input" placeholder="Search patient or complaint..." />
+              <select id="doctor-status-filter" class="compact-select">
+                <option value="ALL">All Assigned</option>
+                <option value="PENDING">Awaiting Review</option>
+                <option value="REVIEWED">Reviewed</option>
+              </select>
             </div>
-        </section>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Patient</th>
+                  <th>Date</th>
+                  <th>Complaint &amp; Vitals</th>
+                  <th>Nurse Notes</th>
+                  <th>Doctor Assessment</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="doctor-consultations-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-        <!-- ==================== DOCTOR VIEWS ==================== -->
-        <section id="view-doctor-consultations" class="view-section hidden">
-            <div class="grid-2">
-                <div class="card">
-                    <h2>Assigned Consultations</h2>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Patient</th>
-                                    <th>Date</th>
-                                    <th>Complaint & Vitals</th>
-                                    <th>Doctor Review</th>
-                                </tr>
-                            </thead>
-                            <tbody id="doctor-consultations-tbody"></tbody>
-                        </table>
-                    </div>
+      <!-- ==================== NURSE VIEWS ==================== -->
+      <section id="view-nurse-appointments" class="view-section hidden">
+        <div class="grid-2-sidebar">
+          <div class="card">
+            <h2>Publish Clinic Time Slot</h2>
+            <p class="muted mb-1">Create open schedule slots for student appointment bookings.</p>
+            <form id="create-slot-form">
+              <div class="form-group">
+                <label for="slot-date">Clinic Date *</label>
+                <input id="slot-date" type="date" required />
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="slot-start">Start Time *</label>
+                  <input id="slot-start" type="time" required />
                 </div>
-
-                <div class="card">
-                    <h2>Submit Doctor Assessment</h2>
-                    <form id="doctor-assessment-form">
-                        <div class="form-group">
-                            <label for="doc-consult-id">Consultation ID *</label>
-                            <input id="doc-consult-id" type="number" min="1" required />
-                        </div>
-                        <div class="form-group">
-                            <label for="doc-assessment-text">Clinical Assessment *</label>
-                            <textarea id="doc-assessment-text" rows="3" required placeholder="Enter clinical findings and assessment..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Assessment</button>
-                    </form>
-
-                    <hr class="divider" />
-
-                    <h2>Issue Prescription</h2>
-                    <form id="doctor-prescription-form">
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="doc-rx-patient-id">Patient ID *</label>
-                                <input id="doc-rx-patient-id" type="number" min="1" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="doc-rx-consult-id">Consultation ID *</label>
-                                <input id="doc-rx-consult-id" type="number" min="1" required />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="doc-rx-med">Medicine Name *</label>
-                            <input id="doc-rx-med" type="text" required placeholder="Paracetamol 500mg" />
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="doc-rx-dosage">Dosage *</label>
-                                <input id="doc-rx-dosage" type="text" required placeholder="1 tablet every 6 hours" />
-                            </div>
-                            <div class="form-group">
-                                <label for="doc-rx-instructions">Instructions *</label>
-                                <input id="doc-rx-instructions" type="text" required placeholder="Take after meals for 3 days" />
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Issue Prescription</button>
-                    </form>
+                <div class="form-group">
+                  <label for="slot-end">End Time *</label>
+                  <input id="slot-end" type="time" required />
                 </div>
+              </div>
+              <button type="submit" class="btn btn-primary full-width">+ Publish Slot</button>
+            </form>
+            <div class="mt-1">
+              <strong class="muted">Currently Open Slots:</strong>
+              <div id="nurse-slots-list" class="mini-slot-list mt-sm"></div>
             </div>
-        </section>
+          </div>
 
-        <!-- ==================== NURSE VIEWS ==================== -->
-        <section id="view-nurse-appointments" class="view-section hidden">
-            <div class="grid-2">
-                <div class="card">
-                    <h2>Create Clinic Time Slot</h2>
-                    <form id="create-slot-form">
-                        <div class="form-group">
-                            <label for="slot-date">Date *</label>
-                            <input id="slot-date" type="date" required />
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="slot-start">Start Time *</label>
-                                <input id="slot-start" type="time" step="1" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="slot-end">End Time *</label>
-                                <input id="slot-end" type="time" step="1" required />
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add Time Slot</button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h2>Manage All Appointments</h2>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Patient</th>
-                                    <th>Date & Time</th>
-                                    <th>Status</th>
-                                    <th>Valid Transitions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="nurse-appointments-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
+          <div class="card">
+            <div class="card-head">
+              <h2>Appointment Queue &amp; Lifecycle</h2>
+              <div class="inline-actions">
+                <input id="nurse-appt-search" type="search" class="compact-input" placeholder="Search patient..." />
+                <select id="nurse-appt-filter" class="compact-select">
+                  <option value="ALL">All Statuses</option>
+                  <option value="Booked">Booked</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
             </div>
-        </section>
-
-        <section id="view-nurse-consultations" class="view-section hidden">
-            <div class="grid-2">
-                <div class="card">
-                    <h2>Start New Consultation</h2>
-                    <form id="create-consultation-form">
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="cons-patient-id">Patient ID *</label>
-                                <input id="cons-patient-id" type="number" min="1" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="cons-appt-id">Appointment ID (Optional)</label>
-                                <input id="cons-appt-id" type="number" min="1" />
-                            </div>
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="cons-doctor-id">Assign Doctor ID (Optional)</label>
-                                <input id="cons-doctor-id" type="number" min="1" />
-                            </div>
-                            <div class="form-group">
-                                <label for="cons-bp">Blood Pressure</label>
-                                <input id="cons-bp" type="text" placeholder="120/80" />
-                            </div>
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="cons-temp">Temperature (°C)</label>
-                                <input id="cons-temp" type="number" step="0.1" placeholder="36.8" />
-                            </div>
-                            <div class="form-group">
-                                <label for="cons-complaint">Chief Complaint *</label>
-                                <input id="cons-complaint" type="text" required placeholder="Dizziness, cough..." />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="cons-assessment">Initial Nurse Assessment</label>
-                            <input id="cons-assessment" type="text" />
-                        </div>
-                        <div class="form-group">
-                            <label for="cons-assistance">Assistance Provided</label>
-                            <input id="cons-assistance" type="text" />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Record Consultation</button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h2>Active & Past Consultations</h2>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Patient</th>
-                                    <th>Complaint</th>
-                                    <th>Doctor Review</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="nurse-consultations-tbody"></tbody>
-                        </table>
-                    </div>
-
-                    <hr class="divider" />
-                    <h3>Record Diagnosis / Medical Record</h3>
-                    <form id="create-record-form">
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="rec-patient-id">Patient ID *</label>
-                                <input id="rec-patient-id" type="number" min="1" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="rec-consult-id">Consultation ID *</label>
-                                <input id="rec-consult-id" type="number" min="1" required />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="rec-diagnosis">Diagnosis *</label>
-                            <input id="rec-diagnosis" type="text" required />
-                        </div>
-                        <div class="form-group">
-                            <label for="rec-treatment">Treatment *</label>
-                            <input id="rec-treatment" type="text" required />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Medical Record</button>
-                    </form>
-                </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Patient</th>
+                    <th>Schedule</th>
+                    <th>Doctor</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Workflow Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="nurse-appointments-tbody"></tbody>
+              </table>
             </div>
-        </section>
+          </div>
+        </div>
+      </section>
 
-        <section id="view-nurse-patients" class="view-section hidden">
-            <div class="grid-2">
-                <div class="card">
-                    <h2>Patients Directory</h2>
-                    <form id="create-patient-form" class="inline-form mb-1">
-                        <input id="new-patient-name" type="text" required placeholder="Walk-in Patient Full Name" />
-                        <button type="submit" class="btn btn-primary">Add Patient</button>
-                    </form>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Full Name</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="nurse-patients-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
+      <section id="view-nurse-consultations" class="view-section hidden">
+        <div class="card mb-1">
+          <div class="card-head">
+            <h2>Consultations (Appointment &amp; Walk-In)</h2>
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.openWalkInConsult()">
+              + New Walk-In Consultation
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Patient</th>
+                  <th>Complaint &amp; Vitals</th>
+                  <th>Nurse Assessment</th>
+                  <th>Doctor Assessment</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="nurse-consultations-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-                <div class="card">
-                    <h2>External Doctors & Referrals</h2>
-                    <form id="create-referral-form">
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="ref-patient-id">Patient ID *</label>
-                                <input id="ref-patient-id" type="number" min="1" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="ref-ext-doc-id">External Doctor ID *</label>
-                                <input id="ref-ext-doc-id" type="number" min="1" required />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="ref-reason">Referral Reason *</label>
-                            <input id="ref-reason" type="text" required />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Create Referral</button>
-                    </form>
-
-                    <div class="table-wrap mt-1">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Patient</th>
-                                    <th>External Doctor</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="nurse-referrals-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
+      <section id="view-nurse-patients" class="view-section hidden">
+        <div class="card">
+          <div class="card-head">
+            <h2>Patient Profiles Directory</h2>
+            <div class="inline-actions">
+              <input id="nurse-patient-search" type="search" class="compact-input" placeholder="Search name or student #..." />
+              <select id="nurse-patient-status-filter" class="compact-select">
+                <option value="ALL">All Patients</option>
+                <option value="ACTIVE">Active Only</option>
+                <option value="INACTIVE">Inactive Only</option>
+              </select>
             </div>
-        </section>
+          </div>
+          <form id="create-patient-form" class="inline-form mb-1">
+            <input id="new-patient-name" type="text" required placeholder="Full Name (Walk-In / Manual Patient) *" />
+            <input id="new-patient-student-no" type="text" placeholder="Student Number (Optional)" />
+            <button type="submit" class="btn btn-primary">+ Register Patient</button>
+          </form>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Full Name</th>
+                  <th>Student Number</th>
+                  <th>Account Link</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="nurse-patients-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-        <!-- ==================== REPORTS (NURSE & ADMIN) ==================== -->
-        <section id="view-reports" class="view-section hidden">
-            <div class="grid-2">
-                <div class="card">
-                    <h2>Daily Schedule Report</h2>
-                    <form id="daily-schedule-form" class="inline-form mb-1">
-                        <input id="report-date" type="date" required />
-                        <button type="submit" class="btn btn-primary">Load Schedule</button>
-                    </form>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Patient</th>
-                                    <th>Doctor</th>
-                                    <th>Status</th>
-                                    <th>Reason</th>
-                                </tr>
-                            </thead>
-                            <tbody id="report-schedule-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2>Patient Medical History Report</h2>
-                    <form id="patient-history-form" class="inline-form mb-1">
-                        <input id="report-patient-id" type="number" min="1" required placeholder="Enter Patient ID" />
-                        <button type="submit" class="btn btn-primary">Generate Report</button>
-                    </form>
-                    <div id="patient-history-output" class="report-box">
-                        <p class="muted">Enter a Patient ID above to view aggregated consultations, medical records, prescriptions, and referrals.</p>
-                    </div>
-                </div>
+      <section id="view-nurse-referrals-logs" class="view-section hidden">
+        <div class="grid-2 mb-1">
+          <div class="card">
+            <div class="card-head">
+              <h2>External Referrals</h2>
+              <button type="button" class="btn btn-primary btn-sm" onclick="window.openReferralModal()">
+                + Create Referral
+              </button>
             </div>
-        </section>
-
-        <!-- ==================== ADMIN VIEWS ==================== -->
-        <section id="view-admin-users" class="view-section hidden">
-            <div class="grid-2">
-                <div class="card">
-                    <h2>Create Staff Account</h2>
-                    <form id="create-staff-form">
-                        <div class="form-group">
-                            <label for="staff-name">Full Name *</label>
-                            <input id="staff-name" type="text" required />
-                        </div>
-                        <div class="form-group">
-                            <label for="staff-email">Email *</label>
-                            <input id="staff-email" type="email" required />
-                        </div>
-                        <div class="form-group">
-                            <label for="staff-password">Password (min 8 chars) *</label>
-                            <input id="staff-password" type="password" minlength="8" required />
-                        </div>
-                        <div class="form-group">
-                            <label for="staff-role">Role *</label>
-                            <select id="staff-role" required>
-                                <option value="Nurse">Nurse</option>
-                                <option value="Doctor">Doctor</option>
-                                <option value="Admin">Admin</option>
-                            </select>
-                        </div>
-                        <div class="form-group" id="specialty-group">
-                            <label for="staff-specialty">Doctor Specialty (Required for Doctors)</label>
-                            <input id="staff-specialty" type="text" placeholder="General Medicine, Pediatrics..." />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Create Account</button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h2>System Users</h2>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-users-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Patient</th>
+                    <th>External Doctor</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="nurse-referrals-tbody"></tbody>
+              </table>
             </div>
-        </section>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>External Doctor Directory</h2>
+              <button type="button" class="btn btn-outline btn-sm" onclick="window.openModal('modal-external-doctor')">
+                + Add External Doctor
+              </button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Doctor Name</th>
+                    <th>Specialty</th>
+                    <th>Hospital / Contact</th>
+                  </tr>
+                </thead>
+                <tbody id="external-doctors-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Manual Clinic Logs &amp; Walk-In Activity</h2>
+          </div>
+          <form id="create-clinic-log-form" class="inline-form mb-1">
+            <select id="log-patient-select" class="compact-select">
+              <option value="">-- Optional: Link to Patient --</option>
+            </select>
+            <input id="log-activity" type="text" required placeholder="Describe manual clinic activity / walk-in visit..." />
+            <button type="submit" class="btn btn-primary">+ Record Log</button>
+          </form>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Log ID</th>
+                  <th>Date/Time</th>
+                  <th>Patient</th>
+                  <th>Activity / Notes</th>
+                  <th>Encoded By</th>
+                </tr>
+              </thead>
+              <tbody id="clinic-logs-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== REPORTS (NURSE & ADMIN) ==================== -->
+      <section id="view-reports" class="view-section hidden">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h2>Daily Schedule Report</h2>
+              <form id="daily-schedule-form" class="inline-form">
+                <input id="report-date" type="date" required />
+                <button type="submit" class="btn btn-primary btn-sm">Load</button>
+              </form>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time Slot</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="report-schedule-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>Consolidated Patient History</h2>
+              <form id="patient-history-form" class="inline-form">
+                <input id="report-patient-id" type="number" min="1" required placeholder="Patient ID" style="width:120px" />
+                <button type="submit" class="btn btn-primary btn-sm">Generate</button>
+              </form>
+            </div>
+            <div id="patient-history-output" class="report-box">
+              <p class="muted">Enter a Patient ID to generate full consultations, records, prescriptions, and referrals.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== ADMIN VIEWS ==================== -->
+      <section id="view-admin-users" class="view-section hidden">
+        <div class="grid-2-sidebar">
+          <div class="card">
+            <h2>Create Staff Account</h2>
+            <p class="muted mb-1">Provision Nurse or Doctor credentials.</p>
+            <form id="create-staff-form">
+              <div class="form-group">
+                <label for="staff-name">Full Name *</label>
+                <input id="staff-name" type="text" required />
+              </div>
+              <div class="form-group">
+                <label for="staff-email">Email *</label>
+                <input id="staff-email" type="email" required />
+              </div>
+              <div class="form-group">
+                <label for="staff-password">Password (min 8 chars) *</label>
+                <input id="staff-password" type="password" minlength="8" required />
+              </div>
+              <div class="form-group">
+                <label for="staff-role">Role *</label>
+                <select id="staff-role" required>
+                  <option value="Nurse">Nurse</option>
+                  <option value="Doctor">Doctor</option>
+                </select>
+              </div>
+              <div class="form-group hidden" id="specialty-group">
+                <label for="staff-specialty">Doctor Specialty *</label>
+                <input id="staff-specialty" type="text" placeholder="General Medicine, Pediatrics..." />
+              </div>
+              <button type="submit" class="btn btn-primary full-width">Provision Account</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>System User Accounts</h2>
+              <input id="admin-user-search" type="search" class="compact-input" placeholder="Search name, email, or role..." />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Access Control</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-users-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
+  </div>
 
-    <script type="module" src="js/dashboard.js"></script>
+  <!-- ==================== INTERACTIVE MODALS ==================== -->
+  <div id="modal-doctor-review" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modal-doc-title">Doctor Clinical Assessment</h3>
+        <button type="button" class="close-btn" onclick="window.closeModals()">×</button>
+      </div>
+      <form id="doctor-assessment-form">
+        <input id="doc-consult-id" type="hidden" />
+        <div class="form-group">
+          <label for="doc-assessment-text">Medical Assessment &amp; Findings *</label>
+          <textarea id="doc-assessment-text" rows="4" required placeholder="Enter clinical findings..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary full-width">Submit Assessment</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-doctor-rx" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modal-rx-title">Record Prescription</h3>
+        <button type="button" class="close-btn" onclick="window.closeModals()">×</button>
+      </div>
+      <form id="doctor-prescription-form">
+        <input id="doc-rx-patient-id" type="hidden" />
+        <input id="doc-rx-consult-id" type="hidden" />
+        <div class="form-group hidden" id="doc-rx-prescriber-group">
+          <label for="doc-rx-doctor-id">Authorizing Prescriber Doctor ID *</label>
+          <input id="doc-rx-doctor-id" type="number" min="1" placeholder="Doctor ID authorizing this prescription" />
+        </div>
+        <div class="form-group">
+          <label for="doc-rx-med">Medicine Name *</label>
+          <input id="doc-rx-med" type="text" required placeholder="e.g., Paracetamol 500mg" />
+        </div>
+        <div class="form-group">
+          <label for="doc-rx-dosage">Dosage *</label>
+          <input id="doc-rx-dosage" type="text" required placeholder="e.g., 1 tablet every 6 hours" />
+        </div>
+        <div class="form-group">
+          <label for="doc-rx-instructions">Instructions *</label>
+          <input id="doc-rx-instructions" type="text" required placeholder="Take after meals for 3 days" />
+        </div>
+        <button type="submit" class="btn btn-primary full-width">Save Prescription</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-new-consultation" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modal-cons-title">Create Consultation</h3>
+        <button type="button" class="close-btn" onclick="window.closeModals()">×</button>
+      </div>
+      <form id="create-consultation-form">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="cons-patient-id">Patient ID *</label>
+            <input id="cons-patient-id" type="number" min="1" required />
+          </div>
+          <div class="form-group">
+            <label for="cons-appt-id">Appointment ID (Blank = Walk-In)</label>
+            <input id="cons-appt-id" type="number" min="1" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="cons-doctor-id">Assign Doctor ID (Optional)</label>
+            <input id="cons-doctor-id" type="number" min="1" />
+          </div>
+          <div class="form-group">
+            <label for="cons-bp">Blood Pressure</label>
+            <input id="cons-bp" type="text" placeholder="120/80" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="cons-temp">Temperature (°C)</label>
+            <input id="cons-temp" type="number" step="0.1" placeholder="36.8" />
+          </div>
+          <div class="form-group">
+            <label for="cons-complaint">Chief Complaint *</label>
+            <input id="cons-complaint" type="text" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cons-assessment">Nurse Triage Assessment</label>
+          <input id="cons-assessment" type="text" />
+        </div>
+        <div class="form-group">
+          <label for="cons-assistance">Assistance Provided</label>
+          <input id="cons-assistance" type="text" />
+        </div>
+        <button type="submit" class="btn btn-primary full-width">Save Consultation</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-new-record" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modal-rec-title">Encode Medical Record</h3>
+        <button type="button" class="close-btn" onclick="window.closeModals()">×</button>
+      </div>
+      <form id="create-record-form">
+        <input id="rec-patient-id" type="hidden" />
+        <input id="rec-consult-id" type="hidden" />
+        <div class="form-group">
+          <label for="rec-diagnosis">Diagnosis *</label>
+          <input id="rec-diagnosis" type="text" required />
+        </div>
+        <div class="form-group">
+          <label for="rec-treatment">Treatment Plan *</label>
+          <input id="rec-treatment" type="text" required />
+        </div>
+        <button type="submit" class="btn btn-primary full-width">Save Medical Record</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-edit-patient" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Update Patient Profile</h3>
+        <button type="button" class="close-btn" onclick="window.closeModals()">×</button>
+      </div>
+      <form id="edit-patient-form">
+        <input id="edit-patient-id" type="hidden" />
+        <div class="form-group">
+          <label for="edit-patient-name">Full Name *</label>
+          <input id="edit-patient-name" type="text" required />
+        </div>
+        <div class="form-group">
+          <label for="edit-patient-student-no">Student Number</label>
+          <input id="edit-patient-student-no" type="text" />
+        </div>
+        <button type="submit" class="btn btn-primary full-width">Update Patient</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-external-doctor" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Add External Doctor Contact</h3>
+        <button type="button" class="close-btn" onclick="window.closeModals()">×</button>
+      </div>
+      <form id="create-ext-doc-form">
+        <div class="form-group">
+          <label for="ext-doc-name">Doctor Full Name *</label>
+          <input id="ext-doc-name" type="text" required placeholder="Dr. Maria Santos" />
+        </div>
+        <div class="form-group">
+          <label for="ext-doc-specialty">Specialty *</label>
+          <input id="ext-doc-specialty" type="text" required placeholder="Cardiology, Orthopedics..." />
+        </div>
+        <div class="form-group">
+          <label for="ext-doc-facility">Hospital / Clinic Name</label>
+          <input id="ext-doc-facility" type="text" placeholder="UST Hospital" />
+        </div>
+        <div class="form-group">
+          <label for="ext-doc-contact">Contact Number / Email</label>
+          <input id="ext-doc-contact" type="text" placeholder="0917-000-0000" />
+        </div>
+        <button type="submit" class="btn btn-primary full-width">Save to Directory</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-new-referral" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Create External Referral</h3>
+        <button type="button" class="close-btn" onclick="window.closeModals()">×</button>
+      </div>
+      <form id="create-referral-form">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="ref-patient-id">Patient ID *</label>
+            <input id="ref-patient-id" type="number" min="1" required />
+          </div>
+          <div class="form-group">
+            <label for="ref-ext-doc-id">External Doctor ID *</label>
+            <input id="ref-ext-doc-id" type="number" min="1" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ref-reason">Reason for Referral *</label>
+          <textarea id="ref-reason" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary full-width">Submit Referral</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>
