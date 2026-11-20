@@ -41,7 +41,6 @@ const roleContent = {
         description: "Manage staff accounts, doctor profiles, and clinic reports.",
         modules: [
             ["Staff Accounts", "Create Nurse and Doctor accounts and manage account status.", "/workspace.html?module=admin"],
-            ["Doctors", "Update active doctor profile details.", "/workspace.html?module=doctors"],
             ["Reports", "View patient history and daily schedules.", "/workspace.html?module=reports"]
         ]
     }
