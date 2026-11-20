@@ -43,6 +43,30 @@ public class PrescriptionsController : ControllerBase
         }));
     }
 
+    [HttpGet("assigned")]
+    [Authorize(Roles = "Doctor")]
+    public async Task<IActionResult> GetAssignedDoctorPrescriptions()
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdValue, out var userId))
+            return Unauthorized(new { message = "Doctor user ID was not found in the token." });
+
+        var prescriptions = await _prescriptionService.GetByDoctorUserIdAsync(userId);
+
+        return Ok(prescriptions.Select(p => new
+        {
+            p.PrescriptionId,
+            p.PatientId,
+            PatientName = p.Patient?.FullName,
+            p.ConsultationId,
+            p.MedicineName,
+            p.Dosage,
+            p.Instructions,
+            p.PrescribingDoctorName,
+            p.PrescriptionDate
+        }));
+    }
+
     [HttpGet("{id:int}")]
     [Authorize(Roles = "Nurse")]
     public async Task<IActionResult> GetById(int id)
