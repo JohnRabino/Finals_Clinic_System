@@ -141,8 +141,18 @@ async function renderConsultations() {
     }
     const body = items.map(c => {
         const reviewed = !!c.doctorReviewedAt;
-        const actionCell = role === "doctor" ? (reviewed ? pill("Reviewed") : action(c.consultationId, "consultation-assess", "Submit Assessment")) : role === "nurse" ? (c.timeOut ? pill("Completed") : action(c.consultationId, "consultation-complete", "Complete", "neutral")) : "-";
-        return tr([esc(c.consultationId), esc(c.patientName || `Patient #${c.patientId}`), esc(fmtDate(c.consultationDate)), esc(c.complaint), esc(c.doctorName || "Unassigned"), reviewed ? `<strong>Reviewed</strong><div class="assessment-text">${esc(c.doctorAssessment || "Assessment saved")}</div>` : pill("Pending"), actionCell]);
+        const hasDoctor = !!c.doctorId;
+        const actionCell = role === "doctor"
+            ? (reviewed ? pill("Reviewed") : action(c.consultationId, "consultation-assess", "Submit Assessment"))
+            : role === "nurse"
+                ? (c.timeOut ? pill("Completed") : action(c.consultationId, "consultation-complete", "Complete", "neutral"))
+                : "-";
+        const doctorReviewCell = !hasDoctor
+            ? `<strong>Not Required</strong><div class="assessment-text">No in-house Doctor assigned</div>`
+            : reviewed
+                ? `<strong>Reviewed</strong><div class="assessment-text">${esc(c.doctorAssessment || "Assessment saved")}</div>`
+                : pill("Pending");
+        return tr([esc(c.consultationId), esc(c.patientName || `Patient #${c.patientId}`), esc(fmtDate(c.consultationDate)), esc(c.complaint), esc(c.doctorName || "Unassigned"), doctorReviewCell, actionCell]);
     });
     moduleContent.innerHTML = nursePanel + panel("Consultation List", table(["ID", "Patient", "Date", "Complaint", "Doctor", "Doctor Assessment", "Action"], body, "No consultations found."));
 }
@@ -168,23 +178,94 @@ async function renderRecords() {
 }
 
 async function renderPrescriptions() {
-    const items = rows(await api(role === "student" ? "/Prescriptions/my" : "/Prescriptions"));
+    const listPath = role === "student"
+        ? "/Prescriptions/my"
+        : role === "doctor"
+            ? "/Prescriptions/assigned"
+            : "/Prescriptions";
+
+    const items = rows(await api(listPath));
     let createPanel = "";
+
     if (role === "nurse" || role === "doctor") {
-        const patients = role === "nurse" ? await loadPatients() : [];
         const consultations = await loadConsultations();
-        const external = role === "nurse" ? await loadExternalDoctors() : [];
-        createPanel = panel("Create Prescription", form("prescriptionCreateForm", [
-            ...(role === "nurse" ? [field("Patient", "patientId", "select", { required: true, options: selectOptions(patients, "patientId", "fullName", "Select patient") })] : [field("Patient ID", "patientId", "number", { required: true, min: 1 })]),
-            field("Consultation", "consultationId", "select", { required: true, options: selectOptions(consultations, "consultationId", "complaint", "Select consultation") }),
-            field("Medicine name", "medicineName", "text", { required: true }),
-            field("Dosage", "dosage", "text", { required: true }),
-            field("Instructions", "instructions", "textarea", { required: true, full: true }),
-            ...(role === "nurse" ? [field("External doctor (optional)", "externalDoctorId", "select", { options: `<option value="">None</option>` + external.filter(x => x.isActive).map(x => `<option value="${esc(x.externalDoctorId)}">${esc(x.fullName)}</option>`).join("") })] : [])
-        ], "Save Prescription"));
+        const fields = [];
+
+        if (role === "nurse") {
+            const patients = (await loadPatients()).filter(p => p.isActive);
+            const external = (await loadExternalDoctors()).filter(d => d.isActive);
+
+            fields.push(field("Patient", "patientId", "select", {
+                required: true,
+                options: selectOptions(patients, "patientId", "fullName", "Select patient")
+            }));
+
+            const eligibleConsultations = consultations.filter(c => !c.doctorId || !!c.doctorReviewedAt);
+            const consultationOptions = `<option value="">Select consultation</option>` + eligibleConsultations.map(c => {
+                const doctorStatus = c.doctorId ? "In-house Doctor reviewed" : "No in-house Doctor — external Doctor required";
+                const label = `${c.patientName || `Patient #${c.patientId}`} — ${fmtDate(c.consultationDate)} — ${c.complaint || "Clinic visit"} — ${doctorStatus}`;
+                return `<option value="${esc(c.consultationId)}" data-patient="${esc(c.patientId)}" data-doctor="${esc(c.doctorId || "")}">${esc(label)}</option>`;
+            }).join("");
+
+            fields.push(field("Consultation", "consultationId", "select", {
+                required: true,
+                options: consultationOptions,
+                help: "In-house Doctor consultations must be reviewed first. If no in-house Doctor is assigned, choose an active External Doctor below."
+            }));
+
+            fields.push(field("External Doctor (required only when no in-house Doctor is assigned)", "externalDoctorId", "select", {
+                options: `<option value="">Select external Doctor when needed</option>` + external.map(d =>
+                    `<option value="${esc(d.externalDoctorId)}">${esc(d.fullName)}${d.specialization ? ` — ${esc(d.specialization)}` : ""}</option>`
+                ).join(""),
+                help: "External Doctors do not log in. The Nurse records the prescription details given by the External Doctor."
+            }));
+        } else {
+            const reviewed = consultations.filter(c => !!c.doctorReviewedAt && !!c.doctorId);
+            const consultationOptions = `<option value="">Select your reviewed consultation</option>` + reviewed.map(c => {
+                const label = `${c.patientName || `Patient #${c.patientId}`} — ${fmtDate(c.consultationDate)} — ${c.complaint || "Clinic visit"}`;
+                return `<option value="${esc(c.consultationId)}" data-patient="${esc(c.patientId)}">${esc(label)}</option>`;
+            }).join("");
+
+            fields.push(field("Reviewed consultation", "consultationId", "select", {
+                required: true,
+                options: consultationOptions,
+                help: reviewed.length
+                    ? "Only consultations assigned to you and already reviewed are available. The patient is selected automatically."
+                    : "You do not have a reviewed assigned consultation yet. Ask the Nurse to assign a consultation and submit your assessment first."
+            }));
+        }
+
+        fields.push(field("Medicine name", "medicineName", "text", { required: true, placeholder: "Enter medicine name" }));
+        fields.push(field("Dosage", "dosage", "text", { required: true, placeholder: "Enter dosage" }));
+        fields.push(field("Instructions", "instructions", "textarea", { required: true, full: true, placeholder: "Enter instructions" }));
+
+        createPanel = panel("Create Prescription", form("prescriptionCreateForm", fields, "Save Prescription"));
     }
-    const body = items.map(p => tr([esc(p.prescriptionId), esc(p.patientName || "My Prescription"), esc(p.consultationId), esc(p.medicineName), esc(p.dosage), esc(p.instructions), esc(p.prescribingDoctorName), esc(fmtDate(p.prescriptionDate)), role === "nurse" ? `${action(p.prescriptionId, "prescription-edit", "Edit")}${action(p.prescriptionId, "prescription-delete", "Delete", "danger")}` : "-"]));
-    moduleContent.innerHTML = createPanel + panel("Prescription List", table(["ID", "Patient", "Consultation", "Medicine", "Dosage", "Instructions", "Prescribed By", "Date", "Actions"], body));
+
+    const body = items.map(p => tr([
+        esc(p.prescriptionId),
+        esc(p.patientName || "My Prescription"),
+        esc(p.consultationId),
+        esc(p.medicineName),
+        esc(p.dosage),
+        esc(p.instructions),
+        esc(p.prescribingDoctorName),
+        esc(fmtDate(p.prescriptionDate)),
+        role === "nurse"
+            ? `${action(p.prescriptionId, "prescription-edit", "Edit")}${action(p.prescriptionId, "prescription-delete", "Delete", "danger")}`
+            : "-"
+    ]));
+
+    const headers = ["ID", "Patient", "Consultation", "Medicine", "Dosage", "Instructions", "Prescribed By", "Date"];
+    if (role === "nurse") headers.push("Actions");
+
+    moduleContent.innerHTML = createPanel + panel("Prescription List", table(
+        headers,
+        body,
+        role === "doctor"
+            ? "No prescriptions have been recorded for your assigned consultations yet."
+            : "No prescriptions found."
+    ));
 }
 
 async function renderReferrals() {
@@ -205,7 +286,7 @@ async function renderReferrals() {
 
 function renderPatientHistory(data) {
     const summary = `<div class="detail-list"><div class="detail-item"><span>Patient ID</span><strong>${esc(data.patientId)}</strong></div><div class="detail-item"><span>Full Name</span><strong>${esc(data.fullName)}</strong></div><div class="detail-item"><span>Status</span><strong>${data.isActive ? "Active" : "Inactive"}</strong></div></div>`;
-    const section = (title, headers, items, map) => `<div class="history-section"><h3>${title}</h3>${table(headers, (items || []).map(map), `No ${title.toLowerCase()} found.`)}</div>`;
+    const section = (title, headers, items, map) => `<div class="history-section"><h3>${title}</h3>${table(headers, (items || []).map(map), `No ${title.toLowerCase()} found.`)}`;
     return summary + section("Consultations", ["Date", "Complaint", "Doctor", "Nurse Assessment", "Doctor Assessment", "Time Out"], data.consultations, x => tr([esc(fmtDateTime(x.consultationDate)), esc(x.complaint), esc(x.doctorName), esc(x.assessment), esc(x.doctorAssessment), esc(x.timeOut ? fmtTime(x.timeOut) : "Not completed")])) + section("Medical Records", ["Date", "Diagnosis", "Treatment", "Notes"], data.medicalRecords, x => tr([esc(fmtDate(x.recordDate)), esc(x.diagnosis), esc(x.treatment), esc(x.notes)])) + section("Prescriptions", ["Date", "Medicine", "Dosage", "Instructions", "Prescribed By"], data.prescriptions, x => tr([esc(fmtDate(x.prescriptionDate)), esc(x.medicineName), esc(x.dosage), esc(x.instructions), esc(x.prescribingDoctorName)])) + section("Referrals", ["Date", "Specialist", "Reason", "Status", "Findings", "Diagnosis", "Treatment", "Returned Prescription"], data.referrals, x => tr([esc(fmtDate(x.referralDate)), esc(x.externalDoctorName), esc(x.reason), pill(x.status), esc(x.returnedFindings), esc(x.diagnosis), esc(x.treatment), esc(x.returnedPrescription)]));
 }
 async function renderReports() {
@@ -288,7 +369,43 @@ async function submitForm(event) {
             await api("/MedicalRecords", { method: "POST", body: { patientId: num(v.patientId), consultationId: num(v.consultationId), diagnosis: v.diagnosis, treatment: v.treatment, notes: v.notes } }); message("Medical record saved.");
         }
         if (f === "prescriptionCreateForm") {
-            await api("/Prescriptions", { method: "POST", body: { patientId: num(v.patientId), consultationId: num(v.consultationId), medicineName: v.medicineName, dosage: v.dosage, instructions: v.instructions, externalDoctorId: num(v.externalDoctorId) } }); message("Prescription saved.");
+            const consultation = cache.consultations.find(c => Number(c.consultationId) === Number(v.consultationId));
+            if (!consultation) throw new Error("Select a valid consultation.");
+
+            let patientId;
+            if (role === "doctor") {
+                if (!consultation.doctorReviewedAt || !consultation.doctorId) {
+                    throw new Error("You can only prescribe for a consultation assigned to you and already reviewed by you.");
+                }
+                patientId = consultation.patientId;
+            } else {
+                patientId = num(v.patientId);
+                if (Number(consultation.patientId) !== Number(patientId)) {
+                    throw new Error("The selected consultation does not belong to the selected patient.");
+                }
+                if (consultation.doctorId && !consultation.doctorReviewedAt) {
+                    throw new Error("The assigned in-house Doctor must submit an assessment before a Nurse can record a prescription.");
+                }
+                if (!consultation.doctorId && !v.externalDoctorId) {
+                    throw new Error("Select an active External Doctor because no in-house Doctor is assigned to this consultation.");
+                }
+                if (consultation.doctorId && v.externalDoctorId) {
+                    throw new Error("Do not select an External Doctor when an in-house Doctor is already assigned.");
+                }
+            }
+
+            await api("/Prescriptions", {
+                method: "POST",
+                body: {
+                    patientId: Number(patientId),
+                    consultationId: num(v.consultationId),
+                    medicineName: v.medicineName,
+                    dosage: v.dosage,
+                    instructions: v.instructions,
+                    externalDoctorId: role === "nurse" ? num(v.externalDoctorId) : null
+                }
+            });
+            message("Prescription created successfully.");
         }
         if (f === "referralCreateForm") {
             await api("/Referrals", { method: "POST", body: { patientId: num(v.patientId), externalDoctorId: num(v.externalDoctorId), reason: v.reason, notes: v.notes } }); message("Referral created.");
@@ -305,7 +422,25 @@ async function submitForm(event) {
             return;
         }
         if (f === "slotCreateForm") {
-            await api("/ClinicTimeSlots", { method: "POST", body: { slotDate: v.slotDate, startTime: v.startTime, endTime: v.endTime } }); message("Clinic time slot added.");
+            const toTimeOnlyJson = value => {
+                if (!value) return "";
+                return value.length === 5 ? `${value}:00` : value;
+            };
+            const startTime = toTimeOnlyJson(v.startTime);
+            const endTime = toTimeOnlyJson(v.endTime);
+
+            if (!v.slotDate || !startTime || !endTime) {
+                throw new Error("Enter the slot date, start time, and end time.");
+            }
+            if (endTime <= startTime) {
+                throw new Error("End time must be later than start time.");
+            }
+
+            await api("/ClinicTimeSlots", {
+                method: "POST",
+                body: { slotDate: v.slotDate, startTime, endTime }
+            });
+            message("Clinic time slot created successfully.");
         }
         if (f === "externalCreateForm") {
             await api("/ExternalDoctors", { method: "POST", body: { fullName: v.fullName, specialization: v.specialization, clinicOrHospital: v.clinicOrHospital, address: v.address, contactNumber: v.contactNumber, email: v.email } }); message("External doctor added.");
@@ -368,7 +503,7 @@ async function handleAction(event) {
             await api(`/Prescriptions/${id}`, { method: "PUT", body: { medicineName, dosage, instructions } }); message("Prescription updated.");
         }
         if (actionName === "prescription-delete") {
-            if (!confirm("Delete this prescription entry? Use only to correct an erroneous entry.")) return;
+            if (!confirm("Delete this prescription entry? Use this only to correct an erroneous entry.")) return;
             await api(`/Prescriptions/${id}`, { method: "DELETE" }); message("Prescription deleted.");
         }
         if (actionName === "referral-response") {
@@ -416,9 +551,23 @@ document.getElementById("moduleContent").addEventListener("change", event => {
         const doctorSelect = document.getElementById("doctorId");
         if (option && option.value && patientSelect) {
             patientSelect.value = option.dataset.patient || "";
-            if (doctorSelect && option.dataset.doctor) doctorSelect.value = option.dataset.doctor;
+            if (doctorSelect) doctorSelect.value = option.dataset.doctor || "";
         }
     }
     if (event.target.id === "patientId" && moduleName === "operations") updateManualLogPatientName();
+    if (event.target.id === "consultationId" && moduleName === "prescriptions" && role === "nurse") {
+        const option = event.target.selectedOptions[0];
+        const patientSelect = document.getElementById("patientId");
+        const externalDoctorSelect = document.getElementById("externalDoctorId");
+        if (option && option.value && patientSelect && option.dataset.patient) {
+            patientSelect.value = option.dataset.patient;
+        }
+        if (externalDoctorSelect) {
+            const hasInHouseDoctor = !!(option && option.value && option.dataset.doctor);
+            externalDoctorSelect.disabled = hasInHouseDoctor || !option || !option.value;
+            externalDoctorSelect.required = !!(option && option.value && !hasInHouseDoctor);
+            if (hasInHouseDoctor || !option || !option.value) externalDoctorSelect.value = "";
+        }
+    }
 });
-renderModule();
+renderModule(); 
