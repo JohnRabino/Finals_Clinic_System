@@ -131,8 +131,7 @@ const AngelicareApp = (() => {
             { label: "Clinic Operations", url: "/workspace.html?module=operations", roles: ["nurse"] },
             { label: "Reports", url: "/workspace.html?module=reports", roles: ["nurse", "admin"] },
             { label: "Staff Accounts", url: "/workspace.html?module=admin", roles: ["admin"] },
-            { label: "Doctors", url: "/workspace.html?module=doctors", roles: ["admin"] }
-        ];
+                   ];
         navigation.replaceChildren();
         links.filter(link => link.roles.includes(role)).forEach(link => {
             const anchor = document.createElement("a");
