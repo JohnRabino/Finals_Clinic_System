@@ -31,6 +31,19 @@ public class PrescriptionRepository : IPrescriptionRepository
             .ToListAsync();
     }
 
+    public async Task<List<Prescription>> GetByDoctorUserIdAsync(int userId)
+    {
+        return await _context.Prescriptions
+            .AsNoTracking()
+            .Include(p => p.Patient)
+            .Include(p => p.Consultation)
+                .ThenInclude(c => c.Doctor)
+            .Where(p => p.Consultation.Doctor != null &&
+                        p.Consultation.Doctor.UserId == userId)
+            .OrderByDescending(p => p.PrescriptionDate)
+            .ToListAsync();
+    }
+
     public async Task<List<Prescription>> GetByConsultationIdAsync(int consultationId)
     {
         return await _context.Prescriptions
