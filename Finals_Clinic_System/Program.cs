@@ -1,18 +1,18 @@
-
+using System.Security.Claims;
 using System.Text;
 using Finals_Clinic_System.Data;
+using Finals_Clinic_System.Repositories;
+using Finals_Clinic_System.Repositories.Interfaces;
 using Finals_Clinic_System.Services;
 using Finals_Clinic_System.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -36,22 +36,26 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "Bearer"
                 }
             },
-            new string[] { }
+            Array.Empty<string>()
         }
     });
 });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("DefaultConnection is missing.");
+    ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is missing.");
 
 builder.Services.AddDbContext<ClinicDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 var jwtKey = builder.Configuration["Jwt:Key"]
-    ?? throw new InvalidOperationException("Jwt:Key is missing.");
+    ?? throw new InvalidOperationException("Jwt:Key is missing. Configure it with User Secrets.");
+
+if (Encoding.UTF8.GetByteCount(jwtKey) < 32)
+    throw new InvalidOperationException("Jwt:Key must contain at least 32 bytes.");
 
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "FinalsClinicSystem";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "FinalsClinicSystemUsers";
+var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -64,17 +68,65 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtKey)),
-            RoleClaimType = ClaimTypes.Role
+            IssuerSigningKey = signingKey,
+            RoleClaimType = ClaimTypes.Role,
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var value = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (!int.TryParse(value, out var userId))
+                {
+                    context.Fail("Invalid user.");
+                    return;
+                }
+
+                var db = context.HttpContext.RequestServices.GetRequiredService<ClinicDbContext>();
+                var user = await db.Users.AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                if (user == null || !user.IsActive)
+                    context.Fail("Account is inactive.");
+            }
         };
     });
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IExternalDoctorRepository, ExternalDoctorRepository>();
+builder.Services.AddScoped<IClinicTimeSlotRepository, ClinicTimeSlotRepository>();
+builder.Services.AddScoped<IConsultationRepository, ConsultationRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
+builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
+builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
+builder.Services.AddScoped<IManualClinicLogRepository, ManualClinicLogRepository>();
+builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+builder.Services.AddScoped<IManualClinicLogService, ManualClinicLogService>();
+builder.Services.AddScoped<IReferralService, ReferralService>();
+builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IExternalDoctorService, ExternalDoctorService>();
+builder.Services.AddScoped<IClinicTimeSlotService, ClinicTimeSlotService>();
+builder.Services.AddScoped<IConsultationService, ConsultationService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
+builder.Services.AddScoped<IDoctorService, DoctorService>();
 
 var app = builder.Build();
+
+await InitialAccountSeeder.SeedAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {
@@ -82,7 +134,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

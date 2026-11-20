@@ -13,8 +13,7 @@ public class ExternalDoctorsController : ControllerBase
 {
     private readonly IExternalDoctorService _service;
 
-    public ExternalDoctorsController(
-        IExternalDoctorService service)
+    public ExternalDoctorsController(IExternalDoctorService service)
     {
         _service = service;
     }
@@ -22,7 +21,19 @@ public class ExternalDoctorsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _service.GetAllAsync());
+        var doctors = await _service.GetAllAsync();
+
+        return Ok(doctors.Select(d => new
+        {
+            d.ExternalDoctorId,
+            d.FullName,
+            d.Specialization,
+            d.ClinicOrHospital,
+            d.Address,
+            d.ContactNumber,
+            d.Email,
+            d.IsActive
+        }));
     }
 
     [HttpGet("{id:int}")]
@@ -36,39 +47,78 @@ public class ExternalDoctorsController : ControllerBase
                 message = "External doctor not found."
             });
 
-        return Ok(doctor);
+        return Ok(new
+        {
+            doctor.ExternalDoctorId,
+            doctor.FullName,
+            doctor.Specialization,
+            doctor.ClinicOrHospital,
+            doctor.Address,
+            doctor.ContactNumber,
+            doctor.Email,
+            doctor.IsActive
+        });
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(
-        ExternalDoctorDto dto)
+    public async Task<IActionResult> Create(ExternalDoctorDto dto)
     {
         var result = await _service.CreateAsync(dto);
 
         if (!result.Success)
+        {
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { message = result.Message });
             return BadRequest(new { message = result.Message });
+        }
 
-        return Ok(new
+        var doctor = result.Data!;
+
+        return StatusCode(StatusCodes.Status201Created, new
         {
             message = result.Message,
-            data = result.Data
+            data = new
+            {
+                doctor.ExternalDoctorId,
+                doctor.FullName,
+                doctor.Specialization,
+                doctor.ClinicOrHospital,
+                doctor.Address,
+                doctor.ContactNumber,
+                doctor.Email,
+                doctor.IsActive
+            }
         });
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(
-        int id,
-        ExternalDoctorDto dto)
+    public async Task<IActionResult> Update(int id, ExternalDoctorDto dto)
     {
         var result = await _service.UpdateAsync(id, dto);
 
         if (!result.Success)
+        {
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { message = result.Message });
             return BadRequest(new { message = result.Message });
+        }
+
+        var doctor = result.Data!;
 
         return Ok(new
         {
             message = result.Message,
-            data = result.Data
+            data = new
+            {
+                doctor.ExternalDoctorId,
+                doctor.FullName,
+                doctor.Specialization,
+                doctor.ClinicOrHospital,
+                doctor.Address,
+                doctor.ContactNumber,
+                doctor.Email,
+                doctor.IsActive
+            }
         });
     }
 

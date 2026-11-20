@@ -1,0 +1,22 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Finals_Clinic_System.Models;
+
+public class ManualClinicLog
+{
+    [Key]
+    public int ManualLogId { get; set; }
+
+    public int? PatientId { get; set; }
+    public Patient? Patient { get; set; }
+
+    public string PatientName { get; set; } = string.Empty;
+    public DateTime VisitDate { get; set; }
+    public string Complaint { get; set; } = string.Empty;
+    public string? Notes { get; set; }
+
+    public int EncodedByUserId { get; set; }
+    public User EncodedByUser { get; set; } = null!;
+
+    public DateTime EncodedAt { get; set; } = DateTime.Now;
+}

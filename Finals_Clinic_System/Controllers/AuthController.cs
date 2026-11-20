@@ -9,21 +9,40 @@ namespace Finals_Clinic_System.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _auth;
-    public AuthController(IAuthService auth) => _auth = auth;
+
+    public AuthController(IAuthService auth)
+    {
+        _auth = auth;
+    }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto dto)
     {
         var result = await _auth.RegisterAsync(dto);
-        if (!result.Success) return BadRequest(new { message = result.Message });
-        return Ok(new { message = result.Message, data = result.Data });
+
+        if (!result.Success)
+        {
+            if (result.Message.Contains("already registered", StringComparison.OrdinalIgnoreCase))
+                return Conflict(new { message = result.Message });
+
+            return BadRequest(new { message = result.Message });
+        }
+
+        return StatusCode(StatusCodes.Status201Created, new
+        {
+            message = result.Message,
+            data = result.Data
+        });
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto dto)
     {
         var result = await _auth.LoginAsync(dto);
-        if (!result.Success) return Unauthorized(new { message = result.Message });
+
+        if (!result.Success)
+            return Unauthorized(new { message = result.Message });
+
         return Ok(new { message = result.Message, data = result.Data });
     }
 }

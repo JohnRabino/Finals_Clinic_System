@@ -1,0 +1,128 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANGELICARE | Appointments</title>
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <h2>ANGELICARE</h2>
+                <p>CLINIC MANAGEMENT SYSTEM</p>
+            </div>
+
+            <div class="sidebar-navigation">
+                <p class="nav-label">MAIN MENU</p>
+                <nav id="sidebarNav"></nav>
+            </div>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-user">
+                    <strong id="sidebarName">User</strong>
+                    <span id="sidebarRole">Role</span>
+                </div>
+
+                <button type="button" id="logoutButton" class="logout-button">
+                    Log Out
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <h2>Appointments</h2>
+
+                <div class="topbar-user">
+                    <strong id="topbarName">User</strong>
+                    <span id="topbarRole">Role</span>
+                </div>
+            </header>
+
+            <section class="page-content">
+                <div class="page-heading">
+                    <h1 id="appointmentPageTitle">Appointments</h1>
+                    <p id="appointmentPageDescription">
+                        View and manage clinic appointments.
+                    </p>
+                </div>
+
+                <div id="appointmentFeedback" class="feedback"></div>
+
+                <div id="bookingPanel" class="content-card">
+                    <h2>Book an Appointment</h2>
+
+                    <form id="bookingForm">
+                        <div class="form-grid">
+                            <div class="form-field full-width">
+                                <label for="availableSlot">Available Time Slot</label>
+                                <select id="availableSlot" required>
+                                    <option value="">Loading available slots...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field full-width">
+                                <label for="appointmentDoctor">Preferred Doctor (Optional)</label>
+                                <select id="appointmentDoctor">
+                                    <option value="">No specific Doctor</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field full-width">
+                                <label for="appointmentReason">Reason for Appointment</label>
+                                <textarea id="appointmentReason"
+                                          placeholder="Enter the reason for your visit"
+                                          required></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="bookButton" class="primary-button">
+                            Book Appointment
+                        </button>
+                    </form>
+                </div>
+
+                <div class="content-card">
+                    <h2>Appointment Records</h2>
+
+                    <div id="appointmentsLoading" class="loading-state">
+                        Loading appointments...
+                    </div>
+
+                    <div id="appointmentsEmpty" class="empty-state" hidden>
+                        No appointments found.
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" id="appointmentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Appointment ID</th>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Doctor</th>
+                                    <th>Status</th>
+                                    <th id="actionsHeader">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="page-footer">
+                Angelicare Clinic Management System © 2026
+            </footer>
+        </main>
+    </div>
+
+    <script src="js/app.js?v=4"></script>
+    <script src="js/appointments.js?v=4"></script>
+</body>
+</html>

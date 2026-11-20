@@ -21,8 +21,16 @@ public class PatientService : IPatientService
     public Task<Patient?> GetByIdAsync(int id) =>
         _repository.GetByIdAsync(id);
 
-    public Task<Patient?> GetByUserIdAsync(int userId) =>
-        _repository.GetByUserIdAsync(userId);
+    public async Task<Patient?> GetByUserIdAsync(int userId)
+    {
+        var patient = await _repository.GetByUserIdAsync(userId);
+
+        if (patient == null || !patient.IsActive ||
+            patient.User == null || !patient.User.IsActive)
+            return null;
+
+        return patient;
+    }
 
     public async Task<(bool Success, string Message, Patient? Data)>
         CreateAsync(PatientCreateDto dto)
@@ -55,6 +63,11 @@ public class PatientService : IPatientService
 
         patient.FullName = dto.FullName.Trim();
         patient.IsActive = dto.IsActive;
+        if (patient.User != null)
+        {
+            patient.User.FullName = patient.FullName;
+            patient.User.IsActive = dto.IsActive;
+        }
 
         await _repository.SaveChangesAsync();
 
@@ -69,6 +82,8 @@ public class PatientService : IPatientService
             return false;
 
         patient.IsActive = false;
+        if (patient.User != null)
+            patient.User.IsActive = false;
 
         await _repository.SaveChangesAsync();
 

@@ -33,14 +33,28 @@ public class PatientsController : ControllerBase
         if (patient is null)
             return NotFound(new { message = "Student profile not found." });
 
-        return Ok(patient);
+        return Ok(new
+        {
+            patient.PatientId,
+            patient.UserId,
+            patient.FullName,
+            patient.IsActive
+        });
     }
 
     [HttpGet]
-    [Authorize(Roles = "Nurse")]
+    [Authorize(Roles = "Nurse,Admin")]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _service.GetAllAsync());
+        var patients = await _service.GetAllAsync();
+
+        return Ok(patients.Select(patient => new
+        {
+            patient.PatientId,
+            patient.UserId,
+            patient.FullName,
+            patient.IsActive
+        }));
     }
 
     [HttpGet("{id:int}")]
@@ -52,7 +66,13 @@ public class PatientsController : ControllerBase
         if (patient is null)
             return NotFound(new { message = "Patient not found." });
 
-        return Ok(patient);
+        return Ok(new
+        {
+            patient.PatientId,
+            patient.UserId,
+            patient.FullName,
+            patient.IsActive
+        });
     }
 
     [HttpPost]
@@ -64,10 +84,16 @@ public class PatientsController : ControllerBase
         if (!result.Success)
             return BadRequest(new { message = result.Message });
 
-        return Ok(new
+        return StatusCode(StatusCodes.Status201Created, new
         {
             message = result.Message,
-            data = result.Data
+            data = result.Data == null ? null : new
+            {
+                result.Data.PatientId,
+                result.Data.UserId,
+                result.Data.FullName,
+                result.Data.IsActive
+            }
         });
     }
 
@@ -80,12 +106,22 @@ public class PatientsController : ControllerBase
         var result = await _service.UpdateAsync(id, dto);
 
         if (!result.Success)
+        {
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { message = result.Message });
             return BadRequest(new { message = result.Message });
+        }
 
         return Ok(new
         {
             message = result.Message,
-            data = result.Data
+            data = result.Data == null ? null : new
+            {
+                result.Data.PatientId,
+                result.Data.UserId,
+                result.Data.FullName,
+                result.Data.IsActive
+            }
         });
     }
 

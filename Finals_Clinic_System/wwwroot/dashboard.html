@@ -1,0 +1,73 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANGELICARE | Dashboard</title>
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <h2>ANGELICARE</h2>
+                <p>CLINIC MANAGEMENT SYSTEM</p>
+            </div>
+
+            <div class="sidebar-navigation">
+                <p class="nav-label">MAIN MENU</p>
+                <nav id="sidebarNav"></nav>
+            </div>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-user">
+                    <strong id="sidebarName">User</strong>
+                    <span id="sidebarRole">Role</span>
+                </div>
+
+                <button type="button" id="logoutButton" class="logout-button">
+                    Log Out
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <h2>Dashboard</h2>
+
+                <div class="topbar-user">
+                    <strong id="topbarName">User</strong>
+                    <span id="topbarRole">Role</span>
+                </div>
+            </header>
+
+            <section class="page-content">
+                <div class="page-heading">
+                    <h1>Dashboard Overview</h1>
+                    <p>Welcome to the Angelicare Clinic Management System.</p>
+                </div>
+
+                <div class="welcome-panel">
+                    <h2 id="welcomeTitle">Welcome!</h2>
+                    <p id="welcomeDescription">
+                        Select a module below to continue.
+                    </p>
+                </div>
+
+                <h2 class="section-heading">Quick Access</h2>
+
+                <div id="quickAccess" class="quick-access-grid"></div>
+            </section>
+
+            <footer class="page-footer">
+                Angelicare Clinic Management System © 2026
+            </footer>
+        </main>
+    </div>
+
+    <script src="js/app.js?v=4"></script>
+    <script src="js/dashboard.js?v=4"></script>
+</body>
+</html>

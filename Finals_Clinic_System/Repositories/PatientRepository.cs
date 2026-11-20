@@ -23,12 +23,14 @@ public class PatientRepository : IPatientRepository
 
     public Task<Patient?> GetByIdAsync(int id) =>
         _context.Patients
+            .Include(p => p.User)
             .FirstOrDefaultAsync(p => p.PatientId == id);
 
     public Task<Patient?> GetByUserIdAsync(int userId) =>
-        _context.Patients
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.UserId == userId);
+    _context.Patients
+        .Include(p => p.User)
+        .AsNoTracking()
+        .FirstOrDefaultAsync(p => p.UserId == userId);
 
     public async Task AddAsync(Patient patient) =>
         await _context.Patients.AddAsync(patient);

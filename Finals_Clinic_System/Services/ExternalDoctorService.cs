@@ -30,11 +30,11 @@ public class ExternalDoctorService : IExternalDoctorService
         var doctor = new ExternalDoctor
         {
             FullName = dto.FullName.Trim(),
-            Specialization = dto.Specialization,
-            ClinicOrHospital = dto.ClinicOrHospital,
-            Address = dto.Address,
-            ContactNumber = dto.ContactNumber,
-            Email = dto.Email,
+            Specialization = dto.Specialization?.Trim(),
+            ClinicOrHospital = dto.ClinicOrHospital?.Trim(),
+            Address = dto.Address?.Trim(),
+            ContactNumber = dto.ContactNumber?.Trim(),
+            Email = dto.Email?.Trim().ToLowerInvariant(),
             IsActive = true
         };
 
@@ -56,11 +56,11 @@ public class ExternalDoctorService : IExternalDoctorService
             return (false, "Doctor name is required.", null);
 
         doctor.FullName = dto.FullName.Trim();
-        doctor.Specialization = dto.Specialization;
-        doctor.ClinicOrHospital = dto.ClinicOrHospital;
-        doctor.Address = dto.Address;
-        doctor.ContactNumber = dto.ContactNumber;
-        doctor.Email = dto.Email;
+        doctor.Specialization = dto.Specialization?.Trim();
+        doctor.ClinicOrHospital = dto.ClinicOrHospital?.Trim();
+        doctor.Address = dto.Address?.Trim();
+        doctor.ContactNumber = dto.ContactNumber?.Trim();
+        doctor.Email = dto.Email?.Trim().ToLowerInvariant();
 
         await _repository.SaveChangesAsync();
 
