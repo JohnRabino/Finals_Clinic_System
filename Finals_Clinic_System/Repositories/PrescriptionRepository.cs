@@ -1,5 +1,4 @@
-﻿
-using Finals_Clinic_System.Data;
+﻿using Finals_Clinic_System.Data;
 using Finals_Clinic_System.Models;
 using Finals_Clinic_System.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -15,25 +14,30 @@ public class PrescriptionRepository : IPrescriptionRepository
         _context = context;
     }
 
-    public async Task<List<Prescription>> GetAllAsync()
+    public Task<List<Prescription>> GetAllAsync()
     {
-        return await _context.Prescriptions
+        return _context.Prescriptions
+            .AsNoTracking()
             .Include(p => p.Patient)
             .Include(p => p.Consultation)
+            .OrderByDescending(p => p.PrescriptionDate)
             .ToListAsync();
     }
 
-    public async Task<List<Prescription>> GetByPatientIdAsync(int patientId)
+    public Task<List<Prescription>> GetByPatientIdAsync(int patientId)
     {
-        return await _context.Prescriptions
+        return _context.Prescriptions
+            .AsNoTracking()
+            .Include(p => p.Patient)
             .Include(p => p.Consultation)
             .Where(p => p.PatientId == patientId)
+            .OrderByDescending(p => p.PrescriptionDate)
             .ToListAsync();
     }
 
-    public async Task<List<Prescription>> GetByDoctorUserIdAsync(int userId)
+    public Task<List<Prescription>> GetByDoctorUserIdAsync(int userId)
     {
-        return await _context.Prescriptions
+        return _context.Prescriptions
             .AsNoTracking()
             .Include(p => p.Patient)
             .Include(p => p.Consultation)
@@ -44,18 +48,21 @@ public class PrescriptionRepository : IPrescriptionRepository
             .ToListAsync();
     }
 
-    public async Task<List<Prescription>> GetByConsultationIdAsync(int consultationId)
+    public Task<List<Prescription>> GetByConsultationIdAsync(int consultationId)
     {
-        return await _context.Prescriptions
+        return _context.Prescriptions
+            .AsNoTracking()
             .Where(p => p.ConsultationId == consultationId)
+            .OrderByDescending(p => p.PrescriptionDate)
             .ToListAsync();
     }
 
-    public async Task<Prescription?> GetByIdAsync(int id)
+    public Task<Prescription?> GetByIdAsync(int id)
     {
-        return await _context.Prescriptions
+        return _context.Prescriptions
             .Include(p => p.Patient)
             .Include(p => p.Consultation)
+                .ThenInclude(c => c.Doctor)
             .FirstOrDefaultAsync(p => p.PrescriptionId == id);
     }
 
@@ -69,8 +76,8 @@ public class PrescriptionRepository : IPrescriptionRepository
         _context.Prescriptions.Remove(prescription);
     }
 
-    public async Task SaveAsync()
+    public Task SaveAsync()
     {
-        await _context.SaveChangesAsync();
+        return _context.SaveChangesAsync();
     }
 }
