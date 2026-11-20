@@ -138,7 +138,9 @@ public static class InitialAccountSeeder
                 user.IsActive = true;
 
                 if (account.Role == "Student")
+                {
                     user.StudentNumber = account.StudentNumber!.Trim();
+                }
 
                 var verification = hasher.VerifyHashedPassword(
                     user,
@@ -226,18 +228,69 @@ public static class InitialAccountSeeder
                 });
         }
 
-        if (!await db.ExternalDoctors.AnyAsync())
+        var demoDoctor = await db.ExternalDoctors
+            .FirstOrDefaultAsync(d =>
+                d.Email.ToLower() == "external.specialist.demo@example.com");
+
+        if (demoDoctor != null)
         {
-            db.ExternalDoctors.Add(new ExternalDoctor
+            var hasReferrals = await db.Referrals
+                .AnyAsync(r => r.ExternalDoctorId == demoDoctor.ExternalDoctorId);
+
+            if (hasReferrals)
             {
-                FullName = "Demo External Specialist",
-                Specialization = "Internal Medicine",
-                ClinicOrHospital = "Community Medical Center",
-                Address = "Demo address",
-                ContactNumber = "09000000000",
-                Email = "external.specialist.demo@example.com",
+                demoDoctor.IsActive = false;
+            }
+            else
+            {
+                db.ExternalDoctors.Remove(demoDoctor);
+            }
+        }
+
+        var externalDoctors = new List<ExternalDoctor>
+        {
+            new ExternalDoctor
+            {
+                FullName = "Dr. Elena Reyes",
+                Specialization = "Cardiology",
+                ClinicOrHospital = "St. Catherine Medical Center",
+                Address = "Quezon City, Philippines",
+                ContactNumber = "09000000001",
+                Email = "elena.reyes@example.com",
                 IsActive = true
-            });
+            },
+            new ExternalDoctor
+            {
+                FullName = "Dr. Marco Villanueva",
+                Specialization = "Orthopedics",
+                ClinicOrHospital = "Northview General Hospital",
+                Address = "Manila, Philippines",
+                ContactNumber = "09000000002",
+                Email = "marco.villanueva@example.com",
+                IsActive = true
+            }
+        };
+
+        foreach (var externalDoctor in externalDoctors)
+        {
+            var email = externalDoctor.Email.Trim().ToLowerInvariant();
+
+            var existingDoctor = await db.ExternalDoctors
+                .FirstOrDefaultAsync(d => d.Email.ToLower() == email);
+
+            if (existingDoctor == null)
+            {
+                db.ExternalDoctors.Add(externalDoctor);
+            }
+            else
+            {
+                existingDoctor.FullName = externalDoctor.FullName;
+                existingDoctor.Specialization = externalDoctor.Specialization;
+                existingDoctor.ClinicOrHospital = externalDoctor.ClinicOrHospital;
+                existingDoctor.Address = externalDoctor.Address;
+                existingDoctor.ContactNumber = externalDoctor.ContactNumber;
+                existingDoctor.IsActive = true;
+            }
         }
 
         await db.SaveChangesAsync();
@@ -246,12 +299,16 @@ public static class InitialAccountSeeder
         Console.WriteLine($"USERS AFTER SEED: {await db.Users.CountAsync()}");
         Console.WriteLine(
             $"AVAILABLE SLOTS AFTER SEED: {await db.ClinicTimeSlots.CountAsync(s => s.IsAvailable)}");
+        Console.WriteLine(
+            $"ACTIVE EXTERNAL DOCTORS: {await db.ExternalDoctors.CountAsync(d => d.IsActive)}");
     }
 
     private static void ValidateAccounts(List<InitialAccount> accounts)
     {
         if (accounts.Count == 0)
+        {
             throw new InvalidOperationException("No demo accounts configured.");
+        }
 
         foreach (var role in RequiredRoles)
         {
@@ -269,40 +326,56 @@ public static class InitialAccountSeeder
         foreach (var account in accounts)
         {
             if (string.IsNullOrWhiteSpace(account.FullName))
+            {
                 throw new InvalidOperationException("FullName is required.");
+            }
 
             if (string.IsNullOrWhiteSpace(account.Email) ||
                 !emailValidator.IsValid(account.Email.Trim()))
+            {
                 throw new InvalidOperationException("A valid email is required.");
+            }
 
             if (!emails.Add(account.Email.Trim()))
+            {
                 throw new InvalidOperationException(
                     $"Duplicate email: {account.Email.Trim()}.");
+            }
 
             if (string.IsNullOrWhiteSpace(account.Password) ||
                 account.Password.Length < 8)
+            {
                 throw new InvalidOperationException(
                     $"A password of at least 8 characters is required for {account.Email}.");
+            }
 
             if (!RequiredRoles.Contains(account.Role, StringComparer.Ordinal))
+            {
                 throw new InvalidOperationException(
                     $"Invalid role '{account.Role}'.");
+            }
 
             if (account.Role == "Student")
             {
                 if (string.IsNullOrWhiteSpace(account.StudentNumber))
+                {
                     throw new InvalidOperationException(
                         $"StudentNumber is required for {account.Email}.");
+                }
 
                 if (!studentNumbers.Add(account.StudentNumber.Trim()))
+                {
                     throw new InvalidOperationException(
                         $"Duplicate student number: {account.StudentNumber}.");
+                }
             }
 
             if (account.Role == "Doctor" &&
                 string.IsNullOrWhiteSpace(account.Specialty))
+            {
                 throw new InvalidOperationException(
                     $"Specialty is required for {account.Email}.");
+            }
         }
     }
 
