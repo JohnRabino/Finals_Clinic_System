@@ -7,9 +7,8 @@ public class CreateManualClinicLogDto
     [Range(1, int.MaxValue)]
     public int? PatientId { get; set; }
 
-    [Required]
-    [StringLength(120, MinimumLength = 2)]
-    public string PatientName { get; set; } = string.Empty;
+    [StringLength(120)]
+    public string? PatientName { get; set; }
 
     public DateTime VisitDate { get; set; }
 
