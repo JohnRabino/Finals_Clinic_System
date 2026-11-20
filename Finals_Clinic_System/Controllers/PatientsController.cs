@@ -43,7 +43,7 @@ public class PatientsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Nurse")]
+    [Authorize(Roles = "Nurse,Admin")]
     public async Task<IActionResult> GetAll()
     {
         var patients = await _service.GetAllAsync();
