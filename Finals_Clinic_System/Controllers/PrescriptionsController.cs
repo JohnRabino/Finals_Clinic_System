@@ -45,9 +45,10 @@ public class PrescriptionsController : ControllerBase
 
     [HttpGet("assigned")]
     [Authorize(Roles = "Doctor")]
-    public async Task<IActionResult> GetAssignedDoctorPrescriptions()
+    public async Task<IActionResult> GetAssignedToDoctor()
     {
         var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         if (!int.TryParse(userIdValue, out var userId))
             return Unauthorized(new { message = "Doctor user ID was not found in the token." });
 
