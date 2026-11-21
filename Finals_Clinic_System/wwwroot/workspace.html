@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANGELICARE | Clinic Workspace</title>
-    <link rel="stylesheet" href="css/app.css">
-    <link rel="stylesheet" href="css/workspace.css">
+    <link rel="stylesheet" href="css/app.css?v=5">
+    <link rel="stylesheet" href="css/workspace.css?v=2">
 </head>
 <body>
     <div class="app-layout">
@@ -20,14 +20,18 @@
         <main class="main-content">
             <header class="topbar"><h2 id="topbarTitle">Clinic Workspace</h2><div class="topbar-user"><strong id="topbarName">User</strong><span id="topbarRole">Role</span></div></header>
             <section class="page-content workspace-content">
-                <div class="page-heading"><h1 id="moduleTitle">Clinic Workspace</h1><p id="moduleDescription">Manage clinic information and records.</p></div>
+                <div class="page-heading workspace-page-heading">
+                    <span class="workspace-eyebrow">CLINIC WORKSPACE</span>
+                    <h1 id="moduleTitle">Clinic Workspace</h1>
+                    <p id="moduleDescription">Manage clinic information and records.</p>
+                </div>
                 <div id="workspaceFeedback" class="feedback" role="status" aria-live="polite"></div>
                 <div id="moduleContent"><div class="content-card">Loading module...</div></div>
             </section>
             <footer class="page-footer">Angelicare Clinic Management System © 2026</footer>
         </main>
     </div>
-    <script src="js/app.js?v=4"></script>
-    <script src="js/workspace.js?v=1"></script>
+    <script src="js/app.js?v=5"></script>
+    <script src="js/workspace.js?v=2"></script>
 </body>
 </html>
