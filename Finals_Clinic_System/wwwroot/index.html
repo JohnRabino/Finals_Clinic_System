@@ -1,53 +1,87 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172d50">
     <title>ANGELICARE | Clinic Management System</title>
-    <link rel="stylesheet" href="css/auth.css?v=3">
+    <link rel="stylesheet" href="css/auth.css?v=6">
 </head>
 <body>
-
-    <main class="auth-container">
-        <section class="brand-section">
-            <div class="brand-content">
-                <p class="brand-label">CLINIC MANAGEMENT SYSTEM</p>
-                <h1>ANGELICARE</h1>
+    <main class="auth-shell">
+        <section class="auth-brand-panel" aria-label="Angelicare introduction">
+            <div class="auth-brand-content">
+                <div class="auth-brand-top">
+                    <div>
+                        <span class="auth-brand-name">ANGELICARE</span>
+                        <span class="auth-brand-subtitle">CLINIC MANAGEMENT SYSTEM</span>
+                    </div>
+                </div>
+                <h1>A place where,<span>we care</span></h1>
                 <p class="brand-description">
-                    Manage appointments, patient records, and clinic services
-                    in one organized system.
+                    Keep appointments, patient information, and everyday clinic work organized in one connected workspace.
                 </p>
+
+                <div class="brand-feature-list" aria-label="Platform features">
+                    <div class="brand-feature">
+                        <span class="brand-feature-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M7.5 3.5v3M16.5 3.5v3M3.5 9.5h17M8 13h3M8 16.5h3M14 13h2"></path></svg>
+                        </span>
+                        <span><strong>Appointment coordination</strong><small>Plan and track clinic visits</small></span>
+                    </div>
+                    <div class="brand-feature">
+                        <span class="brand-feature-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M6 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 20V5a1.5 1.5 0 0 1 2-1.5Z"></path><path d="M14 3.5V8h4M8 12h8M8 16h8"></path></svg>
+                        </span>
+                        <span><strong>Organized patient records</strong><small>Keep visit information connected</small></span>
+                    </div>
+                    <div class="brand-feature">
+                        <span class="brand-feature-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M12 21s-7-3.8-7-10V5l7-2 7 2v6c0 6.2-7 10-7 10Z"></path><path d="M9 12h6M12 9v6"></path></svg>
+                        </span>
+                        <span><strong>Role-based clinic workspace</strong><small>Tools for students and clinic staff</small></span>
+                    </div>
+                </div>
             </div>
 
-            <p class="brand-footer">
-                Angelicare Clinic Management System © 2026
-            </p>
+            <div class="auth-brand-bottom">
+                <span class="brand-bottom-dot" aria-hidden="true"></span>
+                <span>Supporting better care across the school community</span>
+            </div>
+            <div class="auth-brand-decoration" aria-hidden="true">
+                <span class="decoration-ring ring-one"></span>
+                <span class="decoration-ring ring-two"></span>
+                <span class="decoration-ring ring-three"></span>
+            </div>
         </section>
 
-        <section class="form-section">
-            <div class="form-wrapper">
+        <section class="auth-main">
+            <div class="auth-card">
+                <div class="auth-card-brand">
+                    <span class="auth-card-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.2-7.5-10a4.2 4.2 0 0 1 7.5-2.6 4.2 4.2 0 0 1 7.5 2.6c0 5.8-7.5 10-7.5 10Z"></path><path d="M8.5 12h2l1.2-2.5 2.1 5 1.2-2.5h1.5"></path></svg>
+                    </span>
+                    <span class="auth-card-kicker">STUDENT &amp; STAFF PORTAL</span>
+                </div>
 
                 <div class="form-heading">
                     <h2 id="formTitle">Welcome Back</h2>
                     <p id="formDescription">Sign in to your account to continue.</p>
                 </div>
 
-                <div class="form-tabs">
-                    <button type="button" id="loginTab" class="tab active">
-                        Login
-                    </button>
-                    <button type="button" id="registerTab" class="tab">
-                        Register
-                    </button>
+                <div class="form-tabs" role="tablist" aria-label="Account access">
+                    <button type="button" id="loginTab" class="tab active" role="tab" aria-selected="true" aria-controls="loginForm">Login</button>
+                    <button type="button" id="registerTab" class="tab" role="tab" aria-selected="false" aria-controls="registerForm">Register</button>
                 </div>
 
-                <form id="loginForm">
+                <form id="loginForm" class="auth-form">
                     <div class="form-group">
-                        <label for="loginEmail">Email Address</label>
+                        <label for="loginEmail">Email address</label>
                         <input type="email"
                                id="loginEmail"
-                               placeholder="Enter your email"
+                               name="email"
+                               placeholder="name@school.edu"
+                               autocomplete="username"
                                required>
                     </div>
 
@@ -55,37 +89,43 @@
                         <label for="loginPassword">Password</label>
                         <input type="password"
                                id="loginPassword"
+                               name="password"
                                placeholder="Enter your password"
+                               autocomplete="current-password"
                                required>
                     </div>
 
-                    <button type="submit" class="submit-button">
-                        Sign In
-                    </button>
+                    <button type="submit" class="submit-button">Sign In</button>
                 </form>
 
-                <form id="registerForm" class="hidden">
+                <form id="registerForm" class="auth-form hidden">
                     <div class="form-group">
-                        <label for="registerName">Full Name</label>
+                        <label for="registerName">Full name</label>
                         <input type="text"
                                id="registerName"
+                               name="fullName"
                                placeholder="Enter your full name"
+                               autocomplete="name"
                                required>
                     </div>
 
                     <div class="form-group">
-                        <label for="registerStudentNumber">Student Number</label>
+                        <label for="registerStudentNumber">Student number</label>
                         <input type="text"
                                id="registerStudentNumber"
+                               name="studentNumber"
                                placeholder="Enter your student number"
+                               autocomplete="off"
                                required>
                     </div>
 
                     <div class="form-group">
-                        <label for="registerEmail">Email Address</label>
+                        <label for="registerEmail">Email address</label>
                         <input type="email"
                                id="registerEmail"
-                               placeholder="Enter your email"
+                               name="email"
+                               placeholder="name@school.edu"
+                               autocomplete="email"
                                required>
                     </div>
 
@@ -93,22 +133,29 @@
                         <label for="registerPassword">Password</label>
                         <input type="password"
                                id="registerPassword"
+                               name="newPassword"
                                placeholder="At least 8 characters"
                                minlength="8"
+                               autocomplete="new-password"
                                required>
+                        <small class="input-hint">Use at least 8 characters.</small>
                     </div>
 
-                    <button type="submit" class="submit-button">
-                        Create Account
-                    </button>
+                    <button type="submit" class="submit-button">Create Student Account</button>
                 </form>
 
-                <p id="message" class="message"></p>
+                <p id="message" class="message" role="status" aria-live="polite"></p>
 
+                <div class="auth-card-footer">
+                    <span class="auth-footer-line"></span>
+                    <p>Staff accounts are provided by the clinic administrator.</p>
+                </div>
             </div>
+
+            <p class="auth-copyright">Angelicare Clinic Management System <span>·</span> © 2026</p>
         </section>
     </main>
 
-    <script src="js/auth.js"></script>
+    <script src="js/auth.js?v=4"></script>
 </body>
 </html>
