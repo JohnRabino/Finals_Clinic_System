@@ -23,6 +23,8 @@ function switchForm(form) {
 
         loginTab.classList.add("active");
         registerTab.classList.remove("active");
+        loginTab.setAttribute("aria-selected", "true");
+        registerTab.setAttribute("aria-selected", "false");
 
         formTitle.textContent = "Welcome Back";
         formDescription.textContent = "Sign in to your account to continue.";
@@ -32,6 +34,8 @@ function switchForm(form) {
 
         loginTab.classList.remove("active");
         registerTab.classList.add("active");
+        loginTab.setAttribute("aria-selected", "false");
+        registerTab.setAttribute("aria-selected", "true");
 
         formTitle.textContent = "Create Account";
         formDescription.textContent = "Register your student account.";
