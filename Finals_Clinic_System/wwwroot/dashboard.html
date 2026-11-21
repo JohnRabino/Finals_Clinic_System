@@ -1,14 +1,14 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#142c4e">
     <title>ANGELICARE | Dashboard</title>
-    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/app.css?v=5">
+    <link rel="stylesheet" href="css/dashboard.css?v=2">
 </head>
 <body>
-
     <div class="app-layout">
         <aside class="sidebar">
             <div class="sidebar-brand">
@@ -26,48 +26,109 @@
                     <strong id="sidebarName">User</strong>
                     <span id="sidebarRole">Role</span>
                 </div>
-
-                <button type="button" id="logoutButton" class="logout-button">
-                    Log Out
-                </button>
+                <button type="button" id="logoutButton" class="logout-button">Log Out</button>
             </div>
         </aside>
 
-        <main class="main-content">
+        <main class="main-content dashboard-main">
             <header class="topbar">
-                <h2>Dashboard</h2>
-
+                <div class="topbar-heading">
+                    <span class="topbar-kicker">ANGELICARE WORKSPACE</span>
+                    <h2>Dashboard</h2>
+                </div>
                 <div class="topbar-user">
                     <strong id="topbarName">User</strong>
                     <span id="topbarRole">Role</span>
                 </div>
             </header>
 
-            <section class="page-content">
-                <div class="page-heading">
-                    <h1>Dashboard Overview</h1>
-                    <p>Welcome to the Angelicare Clinic Management System.</p>
+            <section class="page-content dashboard-content">
+                <div class="dashboard-heading-row">
+                    <div class="page-heading dashboard-page-heading">
+                        <span class="page-eyebrow">OVERVIEW</span>
+                        <h1 id="welcomeTitle">Welcome!</h1>
+                        <p id="welcomeDescription">Manage your clinic work from one place.</p>
+                    </div>
+                    <div class="dashboard-date" aria-live="polite">
+                        <span class="dashboard-date-label">TODAY</span>
+                        <strong id="dashboardDate">Loading date...</strong>
+                    </div>
                 </div>
 
-                <div class="welcome-panel">
-                    <h2 id="welcomeTitle">Welcome!</h2>
-                    <p id="welcomeDescription">
-                        Select a module below to continue.
-                    </p>
+                <section class="dashboard-hero" aria-label="Dashboard welcome">
+                    <div class="dashboard-hero-copy">
+                        <span class="hero-eyebrow" id="heroEyebrow">YOUR CLINIC AT A GLANCE</span>
+                        <h2 id="heroTitle">A better day starts with organized care.</h2>
+                        <p id="heroDescription">Keep clinic activities, patient information, and daily tasks moving smoothly.</p>
+                        <div class="hero-actions" id="dashboardActions"></div>
+                    </div>
+                </section>
+
+                <section class="dashboard-section summary-section" id="summarySection" aria-labelledby="summaryHeading">
+                    <div class="section-heading-row">
+                        <div>
+                            <span class="section-eyebrow">AT A GLANCE</span>
+                            <h2 class="section-heading" id="summaryHeading">Clinic overview</h2>
+                        </div>
+                        <span class="section-note" id="summaryNote">Live information from the clinic system</span>
+                    </div>
+                    <div class="summary-grid" id="summaryCards" aria-live="polite">
+                        <div class="summary-loading">Loading overview...</div>
+                    </div>
+                </section>
+
+                <div class="dashboard-content-grid">
+                    <section class="dashboard-panel schedule-panel" id="scheduleSection" aria-labelledby="scheduleHeading">
+                        <div class="panel-heading-row">
+                            <div>
+                                <span class="section-eyebrow">DAILY OPERATIONS</span>
+                                <h2 id="scheduleHeading">Today's schedule</h2>
+                                <p class="panel-subtitle">Appointments scheduled for today.</p>
+                            </div>
+                            <a class="panel-link" id="scheduleLink" href="/appointments.html">View appointments <span aria-hidden="true">→</span></a>
+                        </div>
+                        <div id="scheduleContent" class="schedule-content" aria-live="polite">
+                            <div class="summary-loading">Loading today's schedule...</div>
+                        </div>
+                    </section>
+
+                    <aside class="dashboard-panel focus-panel" id="focusPanel" aria-labelledby="focusHeading">
+                        <span class="section-eyebrow">WORKFLOW REMINDER</span>
+                        <h2 id="focusHeading">Keep care moving</h2>
+                        <p id="focusDescription">Review new bookings, keep patient records current, and complete visit documentation.</p>
+                        <div class="focus-divider"></div>
+                        <div class="focus-tip">
+                            <span class="focus-tip-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M12 3.5 14.6 9l6 .9-4.3 4.2 1 5.9-5.3-2.8-5.3 2.8 1-5.9-4.3-4.2 6-.9L12 3.5Z" /></svg>
+                            </span>
+                            <div>
+                                <strong id="focusTipTitle">Small reminder</strong>
+                                <span id="focusTipText">Use the module shortcuts to reach your daily tasks faster.</span>
+                            </div>
+                        </div>
+                    </aside>
                 </div>
 
-                <h2 class="section-heading">Quick Access</h2>
-
-                <div id="quickAccess" class="quick-access-grid"></div>
+                <section class="dashboard-section quick-access-section" aria-labelledby="quickAccessHeading">
+                    <div class="section-heading-row">
+                        <div>
+                            <span class="section-eyebrow">YOUR WORKSPACE</span>
+                            <h2 class="section-heading" id="quickAccessHeading">Quick access</h2>
+                        </div>
+                        <span class="section-note">Open a module to get started</span>
+                    </div>
+                    <div id="quickAccess" class="quick-access-grid"></div>
+                </section>
             </section>
 
-            <footer class="page-footer">
-                Angelicare Clinic Management System © 2026
+            <footer class="page-footer dashboard-footer">
+                <span>Angelicare Clinic Management System</span>
+                <span>© <span id="footerYear">2026</span> · Supporting better clinic care</span>
             </footer>
         </main>
     </div>
 
-    <script src="js/app.js?v=4"></script>
-    <script src="js/dashboard.js?v=4"></script>
+    <script src="js/app.js?v=5"></script>
+    <script src="js/dashboard.js?v=5"></script>
 </body>
 </html>
