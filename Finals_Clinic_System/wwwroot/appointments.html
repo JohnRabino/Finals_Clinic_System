@@ -1,15 +1,15 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172d50">
     <title>ANGELICARE | Appointments</title>
-    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/app.css?v=6">
+    <link rel="stylesheet" href="css/appointments.css?v=1">
 </head>
 <body>
-
-    <div class="app-layout">
+    <div class="app-layout appointments-layout">
         <aside class="sidebar">
             <div class="sidebar-brand">
                 <h2>ANGELICARE</h2>
@@ -26,82 +26,132 @@
                     <strong id="sidebarName">User</strong>
                     <span id="sidebarRole">Role</span>
                 </div>
-
-                <button type="button" id="logoutButton" class="logout-button">
-                    Log Out
-                </button>
+                <button type="button" id="logoutButton" class="logout-button">Log Out</button>
             </div>
         </aside>
 
-        <main class="main-content">
-            <header class="topbar">
-                <h2>Appointments</h2>
-
+        <main class="main-content appointments-main">
+            <header class="topbar appointments-topbar">
+                <div class="appointments-topbar-heading">
+                    <span class="appointments-topbar-kicker">ANGELICARE WORKSPACE</span>
+                    <h2>Appointments</h2>
+                </div>
                 <div class="topbar-user">
                     <strong id="topbarName">User</strong>
                     <span id="topbarRole">Role</span>
                 </div>
             </header>
 
-            <section class="page-content">
-                <div class="page-heading">
-                    <h1 id="appointmentPageTitle">Appointments</h1>
-                    <p id="appointmentPageDescription">
-                        View and manage clinic appointments.
-                    </p>
+            <section class="page-content appointments-content">
+                <div class="appointments-heading-row">
+                    <div class="page-heading appointments-page-heading">
+                        <span class="appointments-eyebrow">SCHEDULING &amp; VISIT PLANNING</span>
+                        <h1 id="appointmentPageTitle">Appointments</h1>
+                        <p id="appointmentPageDescription">View and manage clinic appointments.</p>
+                    </div>
+                    <div class="appointments-heading-note">
+                        <span class="heading-note-dot" aria-hidden="true"></span>
+                        <span>Clinic schedule</span>
+                    </div>
                 </div>
 
-                <div id="appointmentFeedback" class="feedback"></div>
+                <div id="appointmentFeedback" class="feedback" role="status" aria-live="polite"></div>
 
-                <div id="bookingPanel" class="content-card">
-                    <h2>Book an Appointment</h2>
+                <section class="appointment-stats" aria-label="Appointment summary">
+                    <article class="appointment-stat-card stat-total">
+                        <div class="appointment-stat-top"><span>Total appointments</span><span class="appointment-stat-icon" aria-hidden="true">▦</span></div>
+                        <strong id="appointmentTotalCount">—</strong>
+                        <small id="appointmentTotalNote">All recorded appointments</small>
+                    </article>
+                    <article class="appointment-stat-card stat-booked">
+                        <div class="appointment-stat-top"><span>Awaiting confirmation</span><span class="appointment-stat-icon" aria-hidden="true">◷</span></div>
+                        <strong id="appointmentBookedCount">—</strong>
+                        <small>Booked appointments</small>
+                    </article>
+                    <article class="appointment-stat-card stat-confirmed">
+                        <div class="appointment-stat-top"><span>Confirmed</span><span class="appointment-stat-icon" aria-hidden="true">✓</span></div>
+                        <strong id="appointmentConfirmedCount">—</strong>
+                        <small>Ready for the clinic visit</small>
+                    </article>
+                    <article class="appointment-stat-card stat-completed">
+                        <div class="appointment-stat-top"><span>Completed</span><span class="appointment-stat-icon" aria-hidden="true">▤</span></div>
+                        <strong id="appointmentCompletedCount">—</strong>
+                        <small>Visits marked completed</small>
+                    </article>
+                </section>
 
-                    <form id="bookingForm">
-                        <div class="form-grid">
-                            <div class="form-field full-width">
-                                <label for="availableSlot">Available Time Slot</label>
-                                <select id="availableSlot" required>
-                                    <option value="">Loading available slots...</option>
-                                </select>
-                            </div>
+                <section id="bookingPanel" class="content-card appointment-booking-panel">
+                    <div class="appointment-panel-heading">
+                        <div>
+                            <span class="appointment-section-kicker">NEW BOOKING</span>
+                            <h2>Book an appointment</h2>
+                            <p>Choose an available clinic time and tell us what you need help with.</p>
+                        </div>
+                        <span class="appointment-panel-mark" aria-hidden="true">＋</span>
+                    </div>
 
-                            <div class="form-field full-width">
-                                <label for="appointmentDoctor">Preferred Doctor (Optional)</label>
-                                <select id="appointmentDoctor">
-                                    <option value="">No specific Doctor</option>
-                                </select>
-                            </div>
+                    <form id="bookingForm" class="appointment-booking-form">
+                        <div class="form-field">
+                            <label for="availableSlot">Available time slot</label>
+                            <select id="availableSlot" required>
+                                <option value="">Loading available slots...</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="appointmentDoctor">Preferred doctor <span class="optional-label">Optional</span></label>
+                            <select id="appointmentDoctor">
+                                <option value="">No specific Doctor</option>
+                            </select>
+                        </div>
+                        <div class="form-field appointment-reason-field">
+                            <label for="appointmentReason">Reason for appointment</label>
+                            <textarea id="appointmentReason" placeholder="Briefly describe the reason for your visit" required></textarea>
+                        </div>
+                        <div class="appointment-submit-row">
+                            <p>Bookings are subject to available clinic time slots.</p>
+                            <button type="submit" id="bookButton" class="primary-button appointment-book-button" disabled>Book appointment</button>
+                        </div>
+                    </form>
+                </section>
 
-                            <div class="form-field full-width">
-                                <label for="appointmentReason">Reason for Appointment</label>
-                                <textarea id="appointmentReason"
-                                          placeholder="Enter the reason for your visit"
-                                          required></textarea>
+                <section class="content-card appointment-records-panel">
+                    <div class="appointment-records-heading">
+                        <div>
+                            <span class="appointment-section-kicker">SCHEDULE OVERVIEW</span>
+                            <h2 id="appointmentsRecordsTitle">Appointment records</h2>
+                            <p id="appointmentsRecordsDescription">Review scheduled visits and their current status.</p>
+                        </div>
+                        <span class="appointment-records-count" id="appointmentsResultCount">Loading records...</span>
+                    </div>
+
+                    <div class="appointment-toolbar">
+                        <div class="appointment-search-field">
+                            <label for="appointmentsSearch">Search appointments</label>
+                            <div class="appointment-input-wrap">
+                                <span aria-hidden="true">⌕</span>
+                                <input type="search" id="appointmentsSearch" placeholder="Search by patient, appointment ID, doctor, or date">
                             </div>
                         </div>
-
-                        <button type="submit" id="bookButton" class="primary-button">
-                            Book Appointment
-                        </button>
-                    </form>
-                </div>
-
-                <div class="content-card">
-                    <h2>Appointment Records</h2>
-
-                    <div id="appointmentsLoading" class="loading-state">
-                        Loading appointments...
+                        <div class="appointment-filter-field">
+                            <label for="appointmentStatusFilter">Appointment status</label>
+                            <select id="appointmentStatusFilter">
+                                <option value="all">All statuses</option>
+                                <option value="booked">Booked</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div id="appointmentsEmpty" class="empty-state" hidden>
-                        No appointments found.
-                    </div>
+                    <div id="appointmentsLoading" class="loading-state appointment-state">Loading appointments...</div>
+                    <div id="appointmentsEmpty" class="empty-state appointment-state" hidden>No appointments found.</div>
 
-                    <div class="table-wrapper">
-                        <table class="data-table" id="appointmentsTable">
+                    <div class="table-wrapper appointment-table-wrapper" id="appointmentsTableWrapper" hidden>
+                        <table class="data-table appointment-table" id="appointmentsTable">
                             <thead>
                                 <tr>
-                                    <th>Appointment ID</th>
+                                    <th>Appointment</th>
                                     <th>Patient</th>
                                     <th>Date</th>
                                     <th>Time</th>
@@ -113,16 +163,17 @@
                             <tbody id="appointmentsTableBody"></tbody>
                         </table>
                     </div>
-                </div>
+                </section>
             </section>
 
-            <footer class="page-footer">
-                Angelicare Clinic Management System © 2026
+            <footer class="page-footer appointments-footer">
+                <span>Angelicare Clinic Management System</span>
+                <span>Appointments are managed according to clinic availability.</span>
             </footer>
         </main>
     </div>
 
-    <script src="js/app.js?v=4"></script>
-    <script src="js/appointments.js?v=4"></script>
+    <script src="js/app.js?v=6"></script>
+    <script src="js/appointments.js?v=5"></script>
 </body>
 </html>
